@@ -40,7 +40,7 @@
             <!-- Output Section -->
             <div>
                 <h2 class="text-2xl font-semibold text-white border-b-2 border-gray-700 pb-2 mb-4">Result</h2>
-                <div id="outputContainer" class="space-y-2">
+                <div id="outputContainer" class="space-y-4">
                     <p class="text-gray-500">Your generated content will appear here.</p>
                 </div>
             </div>
@@ -101,16 +101,9 @@ Petrova, S., & Martinez, O.. (2024). The Quantum Moment. Routledge.`;
 
             // Keywords that identify a line as a non-copyable heading
             const headingKeywords = [
-                'Question Title:',
-                'Question:',
-                'Options:',
-                'Correct Answer:',
-                'Hint/Explanation:',
-                'Fixed Parts:',
-                'Question Parts (Correct Drag Items):',
-                'Confusing Words (Distractor Drag Items):',
-                'Hint:',
-                'Full Correct Reference:'
+                'Question Title:', 'Question:', 'Options:', 'Correct Answer:',
+                'Hint/Explanation:', 'Fixed Parts:', 'Question Parts (Correct Drag Items):',
+                'Confusing Words (Distractor Drag Items):', 'Hint:', 'Full Correct Reference:'
             ];
 
             generateBtn.addEventListener('click', generateCopyableContent);
@@ -124,70 +117,80 @@ Petrova, S., & Martinez, O.. (2024). The Quantum Moment. Routledge.`;
                     return;
                 }
 
-                const lines = text.split('\n');
+                // Split the entire text into question blocks using a regex lookahead to keep the delimiter
+                const questionBlocks = text.split(/\n(?=Question \d+)/g);
 
-                lines.forEach(line => {
-                    const trimmedLine = line.trim();
-                    
-                    // Handle empty lines
-                    if (trimmedLine === '') {
-                        outputContainer.appendChild(document.createElement('br'));
-                        return;
-                    }
+                questionBlocks.forEach(block => {
+                    if (!block.trim()) return;
 
-                    // Handle "Question X" headers
-                    if (/^Question \d+$/.test(trimmedLine)) {
-                        const heading = document.createElement('h3');
-                        heading.className = 'text-xl font-bold text-blue-400 pt-4';
-                        heading.textContent = trimmedLine;
-                        outputContainer.appendChild(heading);
-                        return;
-                    }
+                    // Create a container to visually group each question
+                    const questionContainer = document.createElement('div');
+                    questionContainer.className = 'bg-gray-800/50 p-4 rounded-xl border border-gray-700';
+                    outputContainer.appendChild(questionContainer);
 
-                    // Handle "-----------------" separators
-                    if (/^-+$/.test(trimmedLine)) {
-                        const hr = document.createElement('hr');
-                        hr.className = 'border-gray-600 my-2';
-                        outputContainer.appendChild(hr);
-                        return;
-                    }
+                    const lines = block.split('\n');
+                    let contentBuffer = [];
 
-                    // Check if the line is a predefined heading
-                    const isHeading = headingKeywords.some(keyword => trimmedLine.startsWith(keyword));
-
-                    if (isHeading) {
-                        const headingDiv = document.createElement('div');
-                        headingDiv.className = 'text-md font-semibold text-gray-400 mt-3 mb-1';
-                        headingDiv.textContent = trimmedLine;
-                        outputContainer.appendChild(headingDiv);
-                    } else {
-                        // This is a content line, so add a copy button
+                    // Helper function to render a block of copyable content
+                    const renderCopyableBlock = (content, container) => {
+                        if (!content) return;
                         const contentWrapper = document.createElement('div');
-                        contentWrapper.className = 'flex justify-between items-center bg-gray-700/50 p-3 rounded-lg my-1 group';
+                        contentWrapper.className = 'flex justify-between items-start bg-gray-700/50 p-3 rounded-lg my-2 group';
 
                         const textSpan = document.createElement('span');
-                        textSpan.className = 'text-gray-200';
-                        textSpan.textContent = trimmedLine;
+                        textSpan.className = 'text-gray-200 whitespace-pre-wrap'; // Preserve newlines
+                        textSpan.textContent = content;
 
                         const copyBtn = document.createElement('button');
-                        copyBtn.className = 'bg-gray-600 hover:bg-blue-600 text-gray-300 hover:text-white font-medium py-1 px-3 rounded-md ml-4 text-sm opacity-50 group-hover:opacity-100 transition-opacity';
+                        copyBtn.className = 'bg-gray-600 hover:bg-blue-600 text-gray-300 hover:text-white font-medium py-1 px-3 rounded-md ml-4 text-sm opacity-50 group-hover:opacity-100 transition-opacity flex-shrink-0';
                         copyBtn.textContent = 'Copy';
-                        copyBtn.onclick = () => copyToClipboard(trimmedLine);
+                        copyBtn.onclick = () => copyToClipboard(content);
 
                         contentWrapper.appendChild(textSpan);
                         contentWrapper.appendChild(copyBtn);
-                        outputContainer.appendChild(contentWrapper);
-                    }
+                        container.appendChild(contentWrapper);
+                    };
+
+                    lines.forEach(line => {
+                        const trimmedLine = line.trim();
+                        if (trimmedLine === '') return;
+
+                        const isHeading = headingKeywords.some(keyword => trimmedLine.startsWith(keyword));
+
+                        if (isHeading) {
+                            // Render any content that was buffered before this heading
+                            renderCopyableBlock(contentBuffer.join('\n'), questionContainer);
+                            contentBuffer = []; // Clear the buffer
+
+                            // Display the heading itself
+                            const headingDiv = document.createElement('div');
+                            headingDiv.className = 'text-md font-semibold text-gray-400 mt-3 mb-1';
+                            headingDiv.textContent = trimmedLine;
+                            questionContainer.appendChild(headingDiv);
+                        } else if (/^Question \d+$/.test(trimmedLine)) {
+                            const heading = document.createElement('h3');
+                            heading.className = 'text-xl font-bold text-blue-400';
+                            heading.textContent = trimmedLine;
+                            questionContainer.appendChild(heading);
+                        } else if (/^-+$/.test(trimmedLine)) {
+                            const hr = document.createElement('hr');
+                            hr.className = 'border-gray-600 my-4';
+                            questionContainer.appendChild(hr);
+                        } else {
+                            // This is a content line, add it to the buffer
+                            contentBuffer.push(trimmedLine);
+                        }
+                    });
+
+                    // Render any remaining content in the buffer at the end of the block
+                    renderCopyableBlock(contentBuffer.join('\n'), questionContainer);
                 });
             }
 
             function copyToClipboard(text) {
-                // Create a temporary textarea element to hold the text
                 const tempTextArea = document.createElement('textarea');
                 tempTextArea.value = text;
                 document.body.appendChild(tempTextArea);
-                
-                // Select and copy the text
                 tempTextArea.select();
                 try {
                     document.execCommand('copy');
@@ -195,19 +198,16 @@ Petrova, S., & Martinez, O.. (2024). The Quantum Moment. Routledge.`;
                 } catch (err) {
                     console.error('Failed to copy text: ', err);
                 }
-                
-                // Remove the temporary element
                 document.body.removeChild(tempTextArea);
             }
 
             function showNotification() {
                 copyNotification.classList.remove('opacity-0', 'translate-y-10');
                 copyNotification.classList.add('opacity-100', 'translate-y-0');
-
                 setTimeout(() => {
                     copyNotification.classList.remove('opacity-100', 'translate-y-0');
                     copyNotification.classList.add('opacity-0', 'translate-y-10');
-                }, 2000); // Notification disappears after 2 seconds
+                }, 2000);
             }
             
             // Automatically generate on page load with the example text

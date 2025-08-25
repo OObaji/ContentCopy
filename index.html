@@ -10,9 +10,9 @@
         body {
             font-family: 'Inter', sans-serif;
         }
-        /* Simple transition for the notification */
+        /* Simple transition for the copy notification toast */
         #copyNotification {
-            transition: opacity 0.5s, transform 0.5s;
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
         }
     </style>
 </head>
@@ -25,19 +25,20 @@
                 <p class="text-gray-400 mt-2">Paste your text below to add copy buttons to content lines.</p>
             </div>
 
-            <!-- Input Section -->
+            <!-- Input Section: Textarea for user input -->
             <div class="mb-6">
                 <label for="inputText" class="block mb-2 text-sm font-medium text-gray-300">Your Text</label>
                 <textarea id="inputText" rows="15" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-4 text-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Paste your formatted text here..."></textarea>
             </div>
 
+            <!-- Generate Button -->
             <div class="text-center mb-8">
                 <button id="generateBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300">
                     Generate Copyable Content
                 </button>
             </div>
 
-            <!-- Output Section -->
+            <!-- Output Section: Where generated copyable content will be displayed -->
             <div>
                 <h2 class="text-2xl font-semibold text-white border-b-2 border-gray-700 pb-2 mb-4">Result</h2>
                 <div id="outputContainer" class="space-y-4">
@@ -47,19 +48,20 @@
         </div>
     </div>
 
-    <!-- Copy Notification Toast -->
-    <div id="copyNotification" class="fixed bottom-5 right-5 bg-green-500 text-white py-2 px-5 rounded-lg shadow-lg opacity-0 transform translate-y-10">
+    <!-- Copy Notification Toast: Appears briefly when text is copied -->
+    <div id="copyNotification" class="fixed bottom-5 right-5 bg-green-500 text-white py-2 px-5 rounded-lg shadow-lg opacity-0 translate-y-10">
         Copied to clipboard!
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // Get references to DOM elements
             const generateBtn = document.getElementById('generateBtn');
             const inputText = document.getElementById('inputText');
             const outputContainer = document.getElementById('outputContainer');
             const copyNotification = document.getElementById('copyNotification');
 
-            // Pre-fill the textarea with the example text
+            // Pre-fill the textarea with the example text for initial demonstration
             inputText.value = `Question 4
 -----------------
 Question Title:
@@ -97,138 +99,171 @@ For a book reference in APA 7, the title of the book is italicized and written i
 Full Correct Reference:
 Petrova, S., & Martinez, O.. (2024). The Quantum Moment. Routledge.`;
 
-            // Keywords that identify a line as a non-copyable heading
+            // Keywords that identify a line as a non-copyable heading (e.g., "Question Title:")
             const headingKeywords = [
                 'Question Title:', 'Question:', 'Options:', 'Correct Answer:',
                 'Hint/Explanation:', 'Fixed Parts:', 'Question Parts (Correct Drag Items):',
                 'Confusing Words (Distractor Drag Items):', 'Hint:', 'Full Correct Reference:'
             ];
 
+            // Attach event listener to the generate button
             generateBtn.addEventListener('click', generateCopyableContent);
 
+            /**
+             * Processes the input text, splits it into logical blocks, and renders
+             * each block with copy buttons. It intelligently groups content lines
+             * and highlights correct answers.
+             */
             function generateCopyableContent() {
-                const text = inputText.value.trim();
+                const text = inputText.value.trim(); // Get and trim the input text
                 outputContainer.innerHTML = ''; // Clear previous output
 
+                // Display a message if no text is entered
                 if (!text) {
                     outputContainer.innerHTML = '<p class="text-gray-500">Please enter some text first.</p>';
                     return;
                 }
 
-                // Split the entire text into question blocks
+                // Split the entire text into individual "question blocks"
+                // This uses a positive lookahead to split before "Question X" without removing "Question X"
                 const questionBlocks = text.split(/\n(?=Question \d+)/g);
 
                 questionBlocks.forEach(block => {
-                    if (!block.trim()) return;
+                    if (!block.trim()) return; // Skip empty blocks
 
+                    // Create a container for each question block in the output
                     const questionContainer = document.createElement('div');
-                    questionContainer.className = 'bg-gray-800/50 p-4 rounded-xl border border-gray-700';
+                    questionContainer.className = 'bg-gray-800/50 p-4 rounded-xl border border-gray-700 mb-6'; // Added bottom margin
                     outputContainer.appendChild(questionContainer);
 
-                    const lines = block.split('\n');
-                    let contentBuffer = [];
-                    let currentSection = 'none'; // State to track the current logical section
-                    let correctAnswerText = ''; // Variable to store the correct answer for highlighting
+                    const lines = block.split('\n'); // Split the current block into lines
+                    let contentBuffer = []; // Buffer to accumulate content lines before rendering
+                    let currentSection = 'none'; // Tracks the current logical section (e.g., 'options', 'question_text')
+                    let correctAnswerText = ''; // Stores the text of the correct answer for highlighting
 
-                    // Helper function to render a block of copyable content
+                    /**
+                     * Renders a block of content with a single copy button.
+                     * Used for multi-line sections like questions or hints.
+                     * @param {string[]} content - An array of lines to be joined and displayed.
+                     * @param {HTMLElement} container - The DOM element to append the content to.
+                     * @param {string} [joinCharacter='\n'] - The character to join the content lines with.
+                     */
                     const renderCopyableBlock = (content, container, joinCharacter = '\n') => {
+                        // Filter out any empty strings from the content array
                         const filteredContent = content.filter(line => line.trim() !== '');
-                        if (filteredContent.length === 0) return;
+                        if (filteredContent.length === 0) return; // Don't render if no content remains
 
-                        const joinedContent = filteredContent.join(joinCharacter);
+                        const joinedContent = filteredContent.join(joinCharacter); // Join lines into a single string
 
+                        // Create the HTML structure for the copyable block
                         const contentWrapper = document.createElement('div');
                         contentWrapper.className = 'flex justify-between items-start bg-gray-700/50 p-3 rounded-lg my-2 group';
+                        
                         const textSpan = document.createElement('span');
-                        textSpan.className = 'text-gray-200 whitespace-pre-wrap';
+                        textSpan.className = 'text-gray-200 whitespace-pre-wrap flex-grow'; // flex-grow to take available space
                         textSpan.textContent = joinedContent;
+                        
                         const copyBtn = document.createElement('button');
                         copyBtn.className = 'bg-gray-600 hover:bg-blue-600 text-gray-300 hover:text-white font-medium py-1 px-3 rounded-md ml-4 text-sm opacity-50 group-hover:opacity-100 transition-opacity flex-shrink-0';
                         copyBtn.textContent = 'Copy';
-                        copyBtn.onclick = () => copyToClipboard(joinedContent);
+                        copyBtn.onclick = () => copyToClipboard(joinedContent); // Attach copy function
+
                         contentWrapper.appendChild(textSpan);
                         contentWrapper.appendChild(copyBtn);
                         container.appendChild(contentWrapper);
                     };
 
-                    // Helper function to render a single line with a copy button
+                    /**
+                     * Renders a single line of content with its own copy button.
+                     * Used for individual options or specific answer lines.
+                     * @param {string} content - The single line of text to display.
+                     * @param {HTMLElement} container - The DOM element to append the content to.
+                     * @param {boolean} [isCorrect=false] - If true, applies a green highlight.
+                     */
                     const renderSingleCopyableLine = (content, container, isCorrect = false) => {
-                        if (!content.trim()) return;
+                        if (!content.trim()) return; // Skip empty lines
 
+                        // Create the HTML structure for the single copyable line
                         const contentWrapper = document.createElement('div');
                         // Apply highlighting for correct answers
                         contentWrapper.className = `flex justify-between items-center p-3 rounded-lg my-1 group ${isCorrect ? 'bg-green-700/70' : 'bg-gray-700/50'}`;
+                        
                         const textSpan = document.createElement('span');
-                        textSpan.className = 'text-gray-200';
+                        textSpan.className = 'text-gray-200 flex-grow'; // flex-grow to take available space
                         textSpan.textContent = content;
+                        
                         const copyBtn = document.createElement('button');
                         copyBtn.className = 'bg-gray-600 hover:bg-blue-600 text-gray-300 hover:text-white font-medium py-1 px-3 rounded-md ml-4 text-sm opacity-50 group-hover:opacity-100 transition-opacity flex-shrink-0';
                         copyBtn.textContent = 'Copy';
-                        copyBtn.onclick = () => copyToClipboard(content);
+                        copyBtn.onclick = () => copyToClipboard(content); // Attach copy function
+
                         contentWrapper.appendChild(textSpan);
                         contentWrapper.appendChild(copyBtn);
                         container.appendChild(contentWrapper);
                     };
 
+                    // Iterate over each line in the current question block
                     lines.forEach(line => {
                         const trimmedLine = line.trim();
 
+                        // Check if the line is a heading, separator, or question number
                         const isHeadingOrSeparator = headingKeywords.some(keyword => trimmedLine.startsWith(keyword)) || /^-+$/.test(trimmedLine);
                         const isQuestionNumber = /^Question \d+$/.test(trimmedLine);
 
                         if (isHeadingOrSeparator || isQuestionNumber) {
-                            // Render any buffered content before processing the new heading/separator/question number
+                            // If there's buffered content, render it before processing the new heading/separator
                             if (contentBuffer.length > 0) {
+                                // Join question text with a space, others with a newline
                                 renderCopyableBlock(contentBuffer, questionContainer, currentSection === 'question_text' ? ' ' : '\n');
-                                contentBuffer = [];
+                                contentBuffer = []; // Clear the buffer
                             }
 
                             if (isQuestionNumber) {
+                                // Render the main question number as a distinct heading
                                 const heading = document.createElement('h3');
-                                heading.className = 'text-xl font-bold text-blue-400';
+                                heading.className = 'text-xl font-bold text-blue-400 mb-2 mt-4'; // Added margins
                                 heading.textContent = trimmedLine;
                                 questionContainer.appendChild(heading);
                                 currentSection = 'none'; // Reset section for new question
-                                correctAnswerText = ''; // Reset correct answer for new question
+                                correctAnswerText = ''; // Reset correct answer storage for new question
                             } else if (/^-+$/.test(trimmedLine)) {
+                                // Render a horizontal rule for separators
                                 const hr = document.createElement('hr');
                                 hr.className = 'border-gray-600 my-4';
                                 questionContainer.appendChild(hr);
                                 currentSection = 'none'; // Reset section after separator
-                            } else { // It's a heading from headingKeywords
+                            } else { // It's a heading from headingKeywords (e.g., "Question Title:")
                                 const headingDiv = document.createElement('div');
                                 headingDiv.className = 'text-md font-semibold text-gray-400 mt-3 mb-1';
                                 headingDiv.textContent = trimmedLine;
                                 questionContainer.appendChild(headingDiv);
 
-                                // Update currentSection based on the heading
+                                // Update currentSection based on the detected heading
                                 if (trimmedLine.startsWith('Question:')) {
                                     currentSection = 'question_text';
                                 } else if (trimmedLine.startsWith('Options:') || trimmedLine.startsWith('Question Parts (Correct Drag Items):') || trimmedLine.startsWith('Confusing Words (Distractor Drag Items):') || trimmedLine.startsWith('Fixed Parts:')) {
                                     currentSection = 'options';
-                                } else if (trimmedLine.startsWith('Correct Answer:')) {
+                                } else if (trimmedLine.startsWith('Correct Answer:') || trimmedLine.startsWith('Full Correct Reference:')) { // Added 'Full Correct Reference' to capture its text
                                     currentSection = 'correct_answer';
-                                } else if (trimmedLine.startsWith('Hint/Explanation:')) {
+                                } else if (trimmedLine.startsWith('Hint/Explanation:') || trimmedLine.startsWith('Hint:')) { // Added 'Hint:'
                                     currentSection = 'hint_explanation';
                                 } else {
                                     currentSection = 'none';
                                 }
                             }
                         } else if (trimmedLine !== '') {
-                            // This is a content line (non-empty)
+                            // This is a content line (non-empty and not a heading/separator)
                             if (currentSection === 'question_text' || currentSection === 'hint_explanation') {
-                                contentBuffer.push(trimmedLine);
+                                contentBuffer.push(trimmedLine); // Buffer these lines to be rendered as a single block
                             } else if (currentSection === 'options') {
-                                // Only render the option if it's NOT the correct answer
-                                if (trimmedLine !== correctAnswerText) {
-                                    renderSingleCopyableLine(trimmedLine, questionContainer, false); // Do not highlight in options list
-                                }
+                                // Render individual options, highlighting if it matches the correct answer
+                                renderSingleCopyableLine(trimmedLine, questionContainer, trimmedLine === correctAnswerText);
                             } else if (currentSection === 'correct_answer') {
-                                correctAnswerText = trimmedLine; // Capture the correct answer
-                                renderSingleCopyableLine(trimmedLine, questionContainer, true); // Render the correct answer itself, highlighted
+                                correctAnswerText = trimmedLine; // Capture the correct answer text
+                                renderSingleCopyableLine(trimmedLine, questionContainer, true); // Render the correct answer, highlighted
                                 currentSection = 'none'; // Move out of 'correct_answer' state after rendering it
                             } else {
-                                // Default to buffering if no specific section is identified
+                                // Default behavior: if no specific section, buffer content to be rendered as a general block
                                 contentBuffer.push(trimmedLine);
                             }
                         }
@@ -236,37 +271,53 @@ Petrova, S., & Martinez, O.. (2024). The Quantum Moment. Routledge.`;
 
                     // Render any remaining content in the buffer after processing all lines in the block
                     if (contentBuffer.length > 0) {
+                        // Join question text with a space, others with a newline
                         renderCopyableBlock(contentBuffer, questionContainer, currentSection === 'question_text' ? ' ' : '\n');
                     }
                 });
             }
 
+            /**
+             * Copies the given text to the clipboard using document.execCommand.
+             * This method is preferred in environments like iframes.
+             * @param {string} text - The text to copy.
+             */
             function copyToClipboard(text) {
+                // Create a temporary textarea element to hold the text
                 const tempTextArea = document.createElement('textarea');
                 tempTextArea.value = text;
-                document.body.appendChild(tempTextArea);
-                tempTextArea.select();
+                document.body.appendChild(tempTextArea); // Append it to the DOM
+                tempTextArea.select(); // Select the text within the textarea
+
                 try {
-                    document.execCommand('copy');
-                    showNotification();
+                    document.execCommand('copy'); // Execute the copy command
+                    showNotification(); // Show success notification
                 } catch (err) {
-                    console.error('Failed to copy text: ', err);
+                    console.error('Failed to copy text: ', err); // Log error if copy fails
+                } finally {
+                    document.body.removeChild(tempTextArea); // Remove the temporary textarea
                 }
-                document.body.removeChild(tempTextArea);
             }
 
+            /**
+             * Shows a transient notification indicating that text has been copied.
+             */
             function showNotification() {
+                // Make the notification visible and slide it up
                 copyNotification.classList.remove('opacity-0', 'translate-y-10');
                 copyNotification.classList.add('opacity-100', 'translate-y-0');
+
+                // Hide the notification after a delay
                 setTimeout(() => {
                     copyNotification.classList.remove('opacity-100', 'translate-y-0');
                     copyNotification.classList.add('opacity-0', 'translate-y-10');
-                }, 2000);
+                }, 2000); // Notification stays for 2 seconds
             }
             
-            // Automatically generate on page load with the example text
+            // Automatically generate content on page load using the pre-filled example text
             generateCopyableContent();
         });
     </script>
 </body>
 </html>
+

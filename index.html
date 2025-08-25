@@ -66,7 +66,6 @@ Question Title:
 Books - MCQ - APA 7 (MCQ)
 Question:
 You are citing "The Quantum Moment" by Ben Carter and Mei Lin, published by Sage Publications in 2024.
-Which of the following is the correct reference?
 Options:
 Sage Publications, 2024
 Carter, B., & Lin, M.. (2024). The Quantum Moment. Sage Publications.
@@ -83,7 +82,6 @@ Question Title:
 Books - Drag and Drop - APA 7
 Question:
 You are citing "The Quantum Moment" by Sofia Petrova and Olivia Martinez, published by Routledge in 2024.
-Complete the reference by dragging the correct parts into the '||' placeholders:
 Fixed Parts:
 Petrova, S., & Martinez, O.. (2024). ||. ||.
 Question Parts (Correct Drag Items):
@@ -129,30 +127,37 @@ Petrova, S., & Martinez, O.. (2024). The Quantum Moment. Routledge.`;
 
                     const lines = block.split('\n');
                     let contentBuffer = [];
-                    let inOptionsSection = false; // State to track if we are in the "Options" section
+                    let currentSection = 'none'; // State to track the current logical section
+                    let correctAnswerText = ''; // Variable to store the correct answer for highlighting
 
                     // Helper function to render a block of copyable content
-                    const renderCopyableBlock = (content, container) => {
-                        if (!content) return;
+                    const renderCopyableBlock = (content, container, joinCharacter = '\n') => {
+                        const filteredContent = content.filter(line => line.trim() !== '');
+                        if (filteredContent.length === 0) return;
+
+                        const joinedContent = filteredContent.join(joinCharacter);
+
                         const contentWrapper = document.createElement('div');
                         contentWrapper.className = 'flex justify-between items-start bg-gray-700/50 p-3 rounded-lg my-2 group';
                         const textSpan = document.createElement('span');
                         textSpan.className = 'text-gray-200 whitespace-pre-wrap';
-                        textSpan.textContent = content;
+                        textSpan.textContent = joinedContent;
                         const copyBtn = document.createElement('button');
                         copyBtn.className = 'bg-gray-600 hover:bg-blue-600 text-gray-300 hover:text-white font-medium py-1 px-3 rounded-md ml-4 text-sm opacity-50 group-hover:opacity-100 transition-opacity flex-shrink-0';
                         copyBtn.textContent = 'Copy';
-                        copyBtn.onclick = () => copyToClipboard(content);
+                        copyBtn.onclick = () => copyToClipboard(joinedContent);
                         contentWrapper.appendChild(textSpan);
                         contentWrapper.appendChild(copyBtn);
                         container.appendChild(contentWrapper);
                     };
 
                     // Helper function to render a single line with a copy button
-                    const renderSingleCopyableLine = (content, container) => {
-                        if (!content) return;
+                    const renderSingleCopyableLine = (content, container, isCorrect = false) => {
+                        if (!content.trim()) return;
+
                         const contentWrapper = document.createElement('div');
-                        contentWrapper.className = 'flex justify-between items-center bg-gray-700/50 p-3 rounded-lg my-1 group';
+                        // Apply highlighting for correct answers
+                        contentWrapper.className = `flex justify-between items-center p-3 rounded-lg my-1 group ${isCorrect ? 'bg-green-700/70' : 'bg-gray-700/50'}`;
                         const textSpan = document.createElement('span');
                         textSpan.className = 'text-gray-200';
                         textSpan.textContent = content;
@@ -167,45 +172,72 @@ Petrova, S., & Martinez, O.. (2024). The Quantum Moment. Routledge.`;
 
                     lines.forEach(line => {
                         const trimmedLine = line.trim();
-                        if (trimmedLine === '') return;
 
-                        const isHeading = headingKeywords.some(keyword => trimmedLine.startsWith(keyword));
+                        const isHeadingOrSeparator = headingKeywords.some(keyword => trimmedLine.startsWith(keyword)) || /^-+$/.test(trimmedLine);
+                        const isQuestionNumber = /^Question \d+$/.test(trimmedLine);
 
-                        if (isHeading) {
-                            renderCopyableBlock(contentBuffer.join('\n'), questionContainer);
-                            contentBuffer = []; // Clear buffer
+                        if (isHeadingOrSeparator || isQuestionNumber) {
+                            // Render any buffered content before processing the new heading/separator/question number
+                            if (contentBuffer.length > 0) {
+                                renderCopyableBlock(contentBuffer, questionContainer, currentSection === 'question_text' ? ' ' : '\n');
+                                contentBuffer = [];
+                            }
 
-                            const headingDiv = document.createElement('div');
-                            headingDiv.className = 'text-md font-semibold text-gray-400 mt-3 mb-1';
-                            headingDiv.textContent = trimmedLine;
-                            questionContainer.appendChild(headingDiv);
+                            if (isQuestionNumber) {
+                                const heading = document.createElement('h3');
+                                heading.className = 'text-xl font-bold text-blue-400';
+                                heading.textContent = trimmedLine;
+                                questionContainer.appendChild(heading);
+                                currentSection = 'none'; // Reset section for new question
+                                correctAnswerText = ''; // Reset correct answer for new question
+                            } else if (/^-+$/.test(trimmedLine)) {
+                                const hr = document.createElement('hr');
+                                hr.className = 'border-gray-600 my-4';
+                                questionContainer.appendChild(hr);
+                                currentSection = 'none'; // Reset section after separator
+                            } else { // It's a heading from headingKeywords
+                                const headingDiv = document.createElement('div');
+                                headingDiv.className = 'text-md font-semibold text-gray-400 mt-3 mb-1';
+                                headingDiv.textContent = trimmedLine;
+                                questionContainer.appendChild(headingDiv);
 
-                            // Update state: enter options section or exit it
-                            inOptionsSection = trimmedLine.startsWith('Options:');
-                        } else if (/^Question \d+$/.test(trimmedLine)) {
-                            const heading = document.createElement('h3');
-                            heading.className = 'text-xl font-bold text-blue-400';
-                            heading.textContent = trimmedLine;
-                            questionContainer.appendChild(heading);
-                            inOptionsSection = false; // Reset state for new question
-                        } else if (/^-+$/.test(trimmedLine)) {
-                            const hr = document.createElement('hr');
-                            hr.className = 'border-gray-600 my-4';
-                            questionContainer.appendChild(hr);
-                        } else {
-                            // This is a content line
-                            if (inOptionsSection) {
-                                // Render each option line separately
-                                renderSingleCopyableLine(trimmedLine, questionContainer);
+                                // Update currentSection based on the heading
+                                if (trimmedLine.startsWith('Question:')) {
+                                    currentSection = 'question_text';
+                                } else if (trimmedLine.startsWith('Options:') || trimmedLine.startsWith('Question Parts (Correct Drag Items):') || trimmedLine.startsWith('Confusing Words (Distractor Drag Items):') || trimmedLine.startsWith('Fixed Parts:')) {
+                                    currentSection = 'options';
+                                } else if (trimmedLine.startsWith('Correct Answer:')) {
+                                    currentSection = 'correct_answer';
+                                } else if (trimmedLine.startsWith('Hint/Explanation:')) {
+                                    currentSection = 'hint_explanation';
+                                } else {
+                                    currentSection = 'none';
+                                }
+                            }
+                        } else if (trimmedLine !== '') {
+                            // This is a content line (non-empty)
+                            if (currentSection === 'question_text' || currentSection === 'hint_explanation') {
+                                contentBuffer.push(trimmedLine);
+                            } else if (currentSection === 'options') {
+                                // Only render the option if it's NOT the correct answer
+                                if (trimmedLine !== correctAnswerText) {
+                                    renderSingleCopyableLine(trimmedLine, questionContainer, false); // Do not highlight in options list
+                                }
+                            } else if (currentSection === 'correct_answer') {
+                                correctAnswerText = trimmedLine; // Capture the correct answer
+                                renderSingleCopyableLine(trimmedLine, questionContainer, true); // Render the correct answer itself, highlighted
+                                currentSection = 'none'; // Move out of 'correct_answer' state after rendering it
                             } else {
-                                // Buffer other content for block copying
+                                // Default to buffering if no specific section is identified
                                 contentBuffer.push(trimmedLine);
                             }
                         }
                     });
 
-                    // Render any remaining content in the buffer
-                    renderCopyableBlock(contentBuffer.join('\n'), questionContainer);
+                    // Render any remaining content in the buffer after processing all lines in the block
+                    if (contentBuffer.length > 0) {
+                        renderCopyableBlock(contentBuffer, questionContainer, currentSection === 'question_text' ? ' ' : '\n');
+                    }
                 });
             }
 

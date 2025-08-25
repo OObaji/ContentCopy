@@ -117,35 +117,49 @@ Petrova, S., & Martinez, O.. (2024). The Quantum Moment. Routledge.`;
                     return;
                 }
 
-                // Split the entire text into question blocks using a regex lookahead to keep the delimiter
+                // Split the entire text into question blocks
                 const questionBlocks = text.split(/\n(?=Question \d+)/g);
 
                 questionBlocks.forEach(block => {
                     if (!block.trim()) return;
 
-                    // Create a container to visually group each question
                     const questionContainer = document.createElement('div');
                     questionContainer.className = 'bg-gray-800/50 p-4 rounded-xl border border-gray-700';
                     outputContainer.appendChild(questionContainer);
 
                     const lines = block.split('\n');
                     let contentBuffer = [];
+                    let inOptionsSection = false; // State to track if we are in the "Options" section
 
                     // Helper function to render a block of copyable content
                     const renderCopyableBlock = (content, container) => {
                         if (!content) return;
                         const contentWrapper = document.createElement('div');
                         contentWrapper.className = 'flex justify-between items-start bg-gray-700/50 p-3 rounded-lg my-2 group';
-
                         const textSpan = document.createElement('span');
-                        textSpan.className = 'text-gray-200 whitespace-pre-wrap'; // Preserve newlines
+                        textSpan.className = 'text-gray-200 whitespace-pre-wrap';
                         textSpan.textContent = content;
-
                         const copyBtn = document.createElement('button');
                         copyBtn.className = 'bg-gray-600 hover:bg-blue-600 text-gray-300 hover:text-white font-medium py-1 px-3 rounded-md ml-4 text-sm opacity-50 group-hover:opacity-100 transition-opacity flex-shrink-0';
                         copyBtn.textContent = 'Copy';
                         copyBtn.onclick = () => copyToClipboard(content);
+                        contentWrapper.appendChild(textSpan);
+                        contentWrapper.appendChild(copyBtn);
+                        container.appendChild(contentWrapper);
+                    };
 
+                    // Helper function to render a single line with a copy button
+                    const renderSingleCopyableLine = (content, container) => {
+                        if (!content) return;
+                        const contentWrapper = document.createElement('div');
+                        contentWrapper.className = 'flex justify-between items-center bg-gray-700/50 p-3 rounded-lg my-1 group';
+                        const textSpan = document.createElement('span');
+                        textSpan.className = 'text-gray-200';
+                        textSpan.textContent = content;
+                        const copyBtn = document.createElement('button');
+                        copyBtn.className = 'bg-gray-600 hover:bg-blue-600 text-gray-300 hover:text-white font-medium py-1 px-3 rounded-md ml-4 text-sm opacity-50 group-hover:opacity-100 transition-opacity flex-shrink-0';
+                        copyBtn.textContent = 'Copy';
+                        copyBtn.onclick = () => copyToClipboard(content);
                         contentWrapper.appendChild(textSpan);
                         contentWrapper.appendChild(copyBtn);
                         container.appendChild(contentWrapper);
@@ -158,31 +172,39 @@ Petrova, S., & Martinez, O.. (2024). The Quantum Moment. Routledge.`;
                         const isHeading = headingKeywords.some(keyword => trimmedLine.startsWith(keyword));
 
                         if (isHeading) {
-                            // Render any content that was buffered before this heading
                             renderCopyableBlock(contentBuffer.join('\n'), questionContainer);
-                            contentBuffer = []; // Clear the buffer
+                            contentBuffer = []; // Clear buffer
 
-                            // Display the heading itself
                             const headingDiv = document.createElement('div');
                             headingDiv.className = 'text-md font-semibold text-gray-400 mt-3 mb-1';
                             headingDiv.textContent = trimmedLine;
                             questionContainer.appendChild(headingDiv);
+
+                            // Update state: enter options section or exit it
+                            inOptionsSection = trimmedLine.startsWith('Options:');
                         } else if (/^Question \d+$/.test(trimmedLine)) {
                             const heading = document.createElement('h3');
                             heading.className = 'text-xl font-bold text-blue-400';
                             heading.textContent = trimmedLine;
                             questionContainer.appendChild(heading);
+                            inOptionsSection = false; // Reset state for new question
                         } else if (/^-+$/.test(trimmedLine)) {
                             const hr = document.createElement('hr');
                             hr.className = 'border-gray-600 my-4';
                             questionContainer.appendChild(hr);
                         } else {
-                            // This is a content line, add it to the buffer
-                            contentBuffer.push(trimmedLine);
+                            // This is a content line
+                            if (inOptionsSection) {
+                                // Render each option line separately
+                                renderSingleCopyableLine(trimmedLine, questionContainer);
+                            } else {
+                                // Buffer other content for block copying
+                                contentBuffer.push(trimmedLine);
+                            }
                         }
                     });
 
-                    // Render any remaining content in the buffer at the end of the block
+                    // Render any remaining content in the buffer
                     renderCopyableBlock(contentBuffer.join('\n'), questionContainer);
                 });
             }

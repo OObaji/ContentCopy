@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Copy Button Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Simple transition for the notification */
+        #copyNotification {
+            transition: opacity 0.5s, transform 0.5s;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200 flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-4xl mx-auto">
+        <div class="bg-gray-800 shadow-2xl rounded-2xl p-6 sm:p-8">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl sm:text-4xl font-bold text-white">Copy Button Generator</h1>
+                <p class="text-gray-400 mt-2">Paste your text below to add copy buttons to content lines.</p>
+            </div>
+
+            <!-- Input Section -->
+            <div class="mb-6">
+                <label for="inputText" class="block mb-2 text-sm font-medium text-gray-300">Your Text</label>
+                <textarea id="inputText" rows="15" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-4 text-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Paste your formatted text here..."></textarea>
+            </div>
+
+            <div class="text-center mb-8">
+                <button id="generateBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300">
+                    Generate Copyable Content
+                </button>
+            </div>
+
+            <!-- Output Section -->
+            <div>
+                <h2 class="text-2xl font-semibold text-white border-b-2 border-gray-700 pb-2 mb-4">Result</h2>
+                <div id="outputContainer" class="space-y-2">
+                    <p class="text-gray-500">Your generated content will appear here.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Copy Notification Toast -->
+    <div id="copyNotification" class="fixed bottom-5 right-5 bg-green-500 text-white py-2 px-5 rounded-lg shadow-lg opacity-0 transform translate-y-10">
+        Copied to clipboard!
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const generateBtn = document.getElementById('generateBtn');
+            const inputText = document.getElementById('inputText');
+            const outputContainer = document.getElementById('outputContainer');
+            const copyNotification = document.getElementById('copyNotification');
+
+            // Pre-fill the textarea with the example text
+            inputText.value = `Question 4
+-----------------
+Question Title:
+Books - MCQ - APA 7 (MCQ)
+Question:
+You are citing "The Quantum Moment" by Ben Carter and Mei Lin, published by Sage Publications in 2024.
+Which of the following is the correct reference?
+Options:
+Sage Publications, 2024
+Carter, B., & Lin, M.. (2024). The Quantum Moment. Sage Publications.
+"The Quantum Moment"
+Carter, Ben & Lin, Mei
+Correct Answer:
+Carter, B., & Lin, M.. (2024). The Quantum Moment. Sage Publications.
+Hint/Explanation:
+For a book reference in APA 7, the title of the book is italicized and written in sentence case.
+
+Question 5
+-----------------
+Question Title:
+Books - Drag and Drop - APA 7
+Question:
+You are citing "The Quantum Moment" by Sofia Petrova and Olivia Martinez, published by Routledge in 2024.
+Complete the reference by dragging the correct parts into the '||' placeholders:
+Fixed Parts:
+Petrova, S., & Martinez, O.. (2024). ||. ||.
+Question Parts (Correct Drag Items):
+The Quantum Moment
+Routledge
+Confusing Words (Distractor Drag Items):
+Petrova, Sofia & Martinez, Olivia
+"The Quantum Moment"
+in press
+Routledge, 2024
+Hint:
+For a book reference in APA 7, the title of the book is italicized and written in sentence case.
+Full Correct Reference:
+Petrova, S., & Martinez, O.. (2024). The Quantum Moment. Routledge.`;
+
+            // Keywords that identify a line as a non-copyable heading
+            const headingKeywords = [
+                'Question Title:',
+                'Question:',
+                'Options:',
+                'Correct Answer:',
+                'Hint/Explanation:',
+                'Fixed Parts:',
+                'Question Parts (Correct Drag Items):',
+                'Confusing Words (Distractor Drag Items):',
+                'Hint:',
+                'Full Correct Reference:'
+            ];
+
+            generateBtn.addEventListener('click', generateCopyableContent);
+
+            function generateCopyableContent() {
+                const text = inputText.value.trim();
+                outputContainer.innerHTML = ''; // Clear previous output
+
+                if (!text) {
+                    outputContainer.innerHTML = '<p class="text-gray-500">Please enter some text first.</p>';
+                    return;
+                }
+
+                const lines = text.split('\n');
+
+                lines.forEach(line => {
+                    const trimmedLine = line.trim();
+                    
+                    // Handle empty lines
+                    if (trimmedLine === '') {
+                        outputContainer.appendChild(document.createElement('br'));
+                        return;
+                    }
+
+                    // Handle "Question X" headers
+                    if (/^Question \d+$/.test(trimmedLine)) {
+                        const heading = document.createElement('h3');
+                        heading.className = 'text-xl font-bold text-blue-400 pt-4';
+                        heading.textContent = trimmedLine;
+                        outputContainer.appendChild(heading);
+                        return;
+                    }
+
+                    // Handle "-----------------" separators
+                    if (/^-+$/.test(trimmedLine)) {
+                        const hr = document.createElement('hr');
+                        hr.className = 'border-gray-600 my-2';
+                        outputContainer.appendChild(hr);
+                        return;
+                    }
+
+                    // Check if the line is a predefined heading
+                    const isHeading = headingKeywords.some(keyword => trimmedLine.startsWith(keyword));
+
+                    if (isHeading) {
+                        const headingDiv = document.createElement('div');
+                        headingDiv.className = 'text-md font-semibold text-gray-400 mt-3 mb-1';
+                        headingDiv.textContent = trimmedLine;
+                        outputContainer.appendChild(headingDiv);
+                    } else {
+                        // This is a content line, so add a copy button
+                        const contentWrapper = document.createElement('div');
+                        contentWrapper.className = 'flex justify-between items-center bg-gray-700/50 p-3 rounded-lg my-1 group';
+
+                        const textSpan = document.createElement('span');
+                        textSpan.className = 'text-gray-200';
+                        textSpan.textContent = trimmedLine;
+
+                        const copyBtn = document.createElement('button');
+                        copyBtn.className = 'bg-gray-600 hover:bg-blue-600 text-gray-300 hover:text-white font-medium py-1 px-3 rounded-md ml-4 text-sm opacity-50 group-hover:opacity-100 transition-opacity';
+                        copyBtn.textContent = 'Copy';
+                        copyBtn.onclick = () => copyToClipboard(trimmedLine);
+
+                        contentWrapper.appendChild(textSpan);
+                        contentWrapper.appendChild(copyBtn);
+                        outputContainer.appendChild(contentWrapper);
+                    }
+                });
+            }
+
+            function copyToClipboard(text) {
+                // Create a temporary textarea element to hold the text
+                const tempTextArea = document.createElement('textarea');
+                tempTextArea.value = text;
+                document.body.appendChild(tempTextArea);
+                
+                // Select and copy the text
+                tempTextArea.select();
+                try {
+                    document.execCommand('copy');
+                    showNotification();
+                } catch (err) {
+                    console.error('Failed to copy text: ', err);
+                }
+                
+                // Remove the temporary element
+                document.body.removeChild(tempTextArea);
+            }
+
+            function showNotification() {
+                copyNotification.classList.remove('opacity-0', 'translate-y-10');
+                copyNotification.classList.add('opacity-100', 'translate-y-0');
+
+                setTimeout(() => {
+                    copyNotification.classList.remove('opacity-100', 'translate-y-0');
+                    copyNotification.classList.add('opacity-0', 'translate-y-10');
+                }, 2000); // Notification disappears after 2 seconds
+            }
+            
+            // Automatically generate on page load with the example text
+            generateCopyableContent();
+        });
+    </script>
+</body>
+</html>

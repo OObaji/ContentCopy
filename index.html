@@ -135,45 +135,112 @@
             const copyNotification = document.getElementById('copyNotification');
 
             // Initial Example Text
-            inputText.value = `Question 4
+            inputText.value = `Question 1
 -----------------
 Question Title:
-Books - MCQ - APA 7 (MCQ)
-Question:
-You are citing "The Quantum Moment" by Ben Carter and Mei Lin, published by Sage Publications in 2024.
-Options:
-Sage Publications, 2024
-Carter, B., & Lin, M.. (2024). The Quantum Moment. Sage Publications.
-"The Quantum Moment"
-Carter, Ben & Lin, Mei
+Books - In-Text Citation (MCQ) - APA 7th Ed.
+
+Scenario:
+Which of the following uses the correct format?
+
 Correct Answer:
-Carter, B., & Lin, M.. (2024). The Quantum Moment. Sage Publications.
+Wood (2025) demonstrates clear positive outcomes.
+
+Options:
+(Wood) 2025 demonstrates clear positive outcomes.
+(Wood, 2025) demonstrates clear positive outcomes.
+Wood 2025 demonstrates clear positive outcomes.
+Wood (2025) demonstrates clear positive outcomes.
+
 Hint/Explanation:
-For a book reference in APA 7, the title of the book is italicized and written in sentence case.
+Pay close attention to the placement of the year.
+
+Question 2
+-----------------
+Question Title:
+Books - In-Text Citation (MCQ) - APA 7th Ed.
+
+Scenario:
+Which of the following uses the correct format?
+
+Correct Answer:
+Jones and Wood (2024) argue that the method is effective.
+
+Options:
+Jones and Wood 2024 argue that the method is effective.
+Jones and Wood (2024) argue that the method is effective.
+(Jones & Wood, 2024) argue that the method is effective.
+(Jones and Wood) 2024 argue that the method is effective.
+
+Hint/Explanation:
+Pay close attention to the placement of the year.
+
+Question 3
+-----------------
+Question Title:
+Books - In-Text Citation (MCQ) - APA 7th Ed.
+
+Scenario:
+Which of the following uses the correct format?
+
+Correct Answer:
+West (2023) demonstrates clear positive outcomes.
+
+Options:
+(West, 2023) demonstrates clear positive outcomes.
+(West) 2023 demonstrates clear positive outcomes.
+West 2023 demonstrates clear positive outcomes.
+West (2023) demonstrates clear positive outcomes.
+
+Hint/Explanation:
+Pay close attention to the placement of the year.
+
+Question 4
+-----------------
+Question Title:
+Books - Reference List (Drag & Drop) - APA 7th Ed.
+
+Scenario:
+In 2025, Oxford University Press released the fourth edition of the book "Political Theory" by Tom King.
+
+Question Parts (Correct Drag Items):
+King, T.
+2025
+(4th ed.).
+
+Fixed Parts:
+| (||). Political Theory || Oxford University Press.
+
+Confusing Words (Distractor Drag Items):
+"Political Theory"
+(2025)
+Oxford University Press, 2025
+
+Hint:
+Pay attention to the order of elements and text formatting.
 
 Question 5
 -----------------
 Question Title:
-Books - Drag and Drop - APA 7
-Question:
-You are citing "The Quantum Moment" by Sofia Petrova and Olivia Martinez, published by Routledge in 2024.
-Fixed Parts:
-Petrova, S., & Martinez, O.. (2024). ||. ||.
-Question Parts (Correct Drag Items):
-The Quantum Moment
-Routledge
-Confusing Words (Distractor Drag Items):
-Petrova, Sofia & Martinez, Olivia
-"The Quantum Moment"
-in press
-Routledge, 2024
-Hint:
-For a book reference in APA 7, the title of the book is italicized and written in sentence case.
-Full Correct Reference:
-Petrova, S., & Martinez, O.. (2024). The Quantum Moment. Routledge.`;
+Books - In-Text Citation (MCQ) - APA 7th Ed.
+
+Scenario:
+Which of the following uses the correct format?
+
+Correct Answer:
+West (2022) claims that the theory is valid.
+
+Options:
+(West, 2022) claims that the theory is valid.
+(West) 2022 claims that the theory is valid.
+West (2022) claims that the theory is valid.
+West 2022 claims that the theory is valid.
+
+Hint/Explanation:
+The correct format is the Author followed by the Year in parentheses.`;
 
             const headingKeywords = [
-                'Question Title:', 'Question:', 'Options:', 'Correct Answer:',
+                'Question Title:', 'Question:', 'Scenario:', 'Options:', 'Correct Answer:',
                 'Hint/Explanation:', 'Fixed Parts:', 'Question Parts (Correct Drag Items):',
                 'Confusing Words (Distractor Drag Items):', 'Hint:', 'Full Correct Reference:'
             ];
@@ -267,7 +334,7 @@ Petrova, S., & Martinez, O.. (2024). The Quantum Moment. Routledge.`;
 
                         if (isHeadingOrSeparator || isQuestionNumber) {
                             if (contentBuffer.length > 0) {
-                                renderCopyableBlock(contentBuffer, questionContainer, currentSection === 'question_text' ? ' ' : '\n');
+                                renderCopyableBlock(contentBuffer, questionContainer, currentSection === 'question_text' || currentSection === 'scenario' ? ' ' : '\n');
                                 contentBuffer = [];
                             }
 
@@ -290,13 +357,14 @@ Petrova, S., & Martinez, O.. (2024). The Quantum Moment. Routledge.`;
                                 questionContainer.appendChild(headingDiv);
 
                                 if (trimmedLine.startsWith('Question:')) currentSection = 'question_text';
+                                else if (trimmedLine.startsWith('Scenario:')) currentSection = 'scenario';
                                 else if (trimmedLine.startsWith('Options:') || trimmedLine.startsWith('Question Parts') || trimmedLine.startsWith('Confusing Words') || trimmedLine.startsWith('Fixed Parts:')) currentSection = 'options';
                                 else if (trimmedLine.startsWith('Correct Answer:') || trimmedLine.startsWith('Full Correct Reference:')) currentSection = 'correct_answer';
                                 else if (trimmedLine.startsWith('Hint')) currentSection = 'hint_explanation';
                                 else currentSection = 'none';
                             }
                         } else if (trimmedLine !== '') {
-                            if (currentSection === 'question_text' || currentSection === 'hint_explanation') {
+                            if (currentSection === 'question_text' || currentSection === 'hint_explanation' || currentSection === 'scenario') {
                                 contentBuffer.push(trimmedLine);
                             } else if (currentSection === 'options') {
                                 renderSingleCopyableLine(trimmedLine, questionContainer, trimmedLine === correctAnswerText);
@@ -311,7 +379,7 @@ Petrova, S., & Martinez, O.. (2024). The Quantum Moment. Routledge.`;
                     });
 
                     if (contentBuffer.length > 0) {
-                        renderCopyableBlock(contentBuffer, questionContainer, currentSection === 'question_text' ? ' ' : '\n');
+                        renderCopyableBlock(contentBuffer, questionContainer, currentSection === 'question_text' || currentSection === 'scenario' ? ' ' : '\n');
                     }
                 });
             }

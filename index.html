@@ -136,108 +136,31 @@
 
             // Initial Example Text
             inputText.value = `Question 1
------------------
 Question Title:
-Books - In-Text Citation (MCQ) - APA 7th Ed.
+Harvard | ReferenceList | Book | DragDrop | Q1
 
-Scenario:
-Which of the following uses the correct format?
+Scenario: Single Author (Scenario 1)
 
-Correct Answer:
-Wood (2025) demonstrates clear positive outcomes.
-
-Options:
-(Wood) 2025 demonstrates clear positive outcomes.
-(Wood, 2025) demonstrates clear positive outcomes.
-Wood 2025 demonstrates clear positive outcomes.
-Wood (2025) demonstrates clear positive outcomes.
-
-Hint/Explanation:
-Pay close attention to the placement of the year.
-
-Question 2
------------------
-Question Title:
-Books - In-Text Citation (MCQ) - APA 7th Ed.
-
-Scenario:
-Which of the following uses the correct format?
-
-Correct Answer:
-Jones and Wood (2024) argue that the method is effective.
-
-Options:
-Jones and Wood 2024 argue that the method is effective.
-Jones and Wood (2024) argue that the method is effective.
-(Jones & Wood, 2024) argue that the method is effective.
-(Jones and Wood) 2024 argue that the method is effective.
-
-Hint/Explanation:
-Pay close attention to the placement of the year.
-
-Question 3
------------------
-Question Title:
-Books - In-Text Citation (MCQ) - APA 7th Ed.
-
-Scenario:
-Which of the following uses the correct format?
-
-Correct Answer:
-West (2023) demonstrates clear positive outcomes.
-
-Options:
-(West, 2023) demonstrates clear positive outcomes.
-(West) 2023 demonstrates clear positive outcomes.
-West 2023 demonstrates clear positive outcomes.
-West (2023) demonstrates clear positive outcomes.
-
-Hint/Explanation:
-Pay close attention to the placement of the year.
-
-Question 4
------------------
-Question Title:
-Books - Reference List (Drag & Drop) - APA 7th Ed.
-
-Scenario:
-In 2025, Oxford University Press released the fourth edition of the book "Political Theory" by Tom King.
+Question:
+You are citing a 2026 book titled "Digital Age" written by M. Lee published by Sage in London.
 
 Question Parts (Correct Drag Items):
-King, T.
-2025
-(4th ed.).
+(2026)
+London:
 
 Fixed Parts:
-| (||). Political Theory || Oxford University Press.
-
-Confusing Words (Distractor Drag Items):
-"Political Theory"
-(2025)
-Oxford University Press, 2025
-
-Hint:
-Pay attention to the order of elements and text formatting.
-
-Question 5
------------------
-Question Title:
-Books - In-Text Citation (MCQ) - APA 7th Ed.
-
-Scenario:
-Which of the following uses the correct format?
+Lee, M.  ||  Digital Age.  ||  Sage.
 
 Correct Answer:
-West (2022) claims that the theory is valid.
+Lee, M. (2026) Digital Age. London: Sage.
 
-Options:
-(West, 2022) claims that the theory is valid.
-(West) 2022 claims that the theory is valid.
-West (2022) claims that the theory is valid.
-West 2022 claims that the theory is valid.
+Confusing Words (Distractor Drag Items):
+Lee
+pg.
+Vol.
 
-Hint/Explanation:
-The correct format is the Author followed by the Year in parentheses.`;
+Hint:
+Harvard: Author (Year) Title. Place: Publisher.`;
 
             const headingKeywords = [
                 'Question Title:', 'Question:', 'Scenario:', 'Options:', 'Correct Answer:',
@@ -284,7 +207,7 @@ The correct format is the Author followed by the Year in parentheses.`;
                     let correctAnswerText = '';
 
                     // Helper to render a block
-                    const renderCopyableBlock = (content, container, joinCharacter = '\n') => {
+                    const renderCopyableBlock = (content, container, joinCharacter = '\n', allowCopy = true) => {
                         const filteredContent = content.filter(line => line.trim() !== '');
                         if (filteredContent.length === 0) return;
                         const joinedContent = filteredContent.join(joinCharacter);
@@ -296,15 +219,24 @@ The correct format is the Author followed by the Year in parentheses.`;
                         textSpan.className = 'text-gray-200 whitespace-pre-wrap flex-grow font-normal leading-relaxed';
                         textSpan.textContent = joinedContent;
                         
-                        const copyBtn = createCopyButton(joinedContent);
+                        if (allowCopy) {
+                            const copyBtn = createCopyButton(joinedContent);
+                            contentWrapper.appendChild(copyBtn);
+                        }
 
                         contentWrapper.appendChild(textSpan);
-                        contentWrapper.appendChild(copyBtn);
+                        // Append button last if using flex-between to keep text on left
+                        if (allowCopy && contentWrapper.children.length > 1) {
+                             // Re-append to ensure order
+                             const btn = contentWrapper.children[0] === textSpan ? contentWrapper.children[1] : contentWrapper.children[0];
+                             contentWrapper.appendChild(btn);
+                        }
+                        
                         container.appendChild(contentWrapper);
                     };
 
                     // Helper to render single line
-                    const renderSingleCopyableLine = (content, container, isCorrect = false) => {
+                    const renderSingleCopyableLine = (content, container, isCorrect = false, allowCopy = true) => {
                         if (!content.trim()) return;
 
                         const contentWrapper = document.createElement('div');
@@ -319,14 +251,17 @@ The correct format is the Author followed by the Year in parentheses.`;
                         textSpan.className = isCorrect ? 'text-emerald-200 font-medium' : 'text-gray-300';
                         textSpan.textContent = content;
                         
-                        const copyBtn = createCopyButton(content);
-
                         contentWrapper.appendChild(textSpan);
-                        contentWrapper.appendChild(copyBtn);
+
+                        if (allowCopy) {
+                            const copyBtn = createCopyButton(content);
+                            contentWrapper.appendChild(copyBtn);
+                        }
+
                         container.appendChild(contentWrapper);
                     };
 
-                    // Logic to parse lines (Original logic preserved)
+                    // Logic to parse lines
                     lines.forEach(line => {
                         const trimmedLine = line.trim();
                         const isHeadingOrSeparator = headingKeywords.some(keyword => trimmedLine.startsWith(keyword)) || /^-+$/.test(trimmedLine);
@@ -334,7 +269,15 @@ The correct format is the Author followed by the Year in parentheses.`;
 
                         if (isHeadingOrSeparator || isQuestionNumber) {
                             if (contentBuffer.length > 0) {
-                                renderCopyableBlock(contentBuffer, questionContainer, currentSection === 'question_text' || currentSection === 'scenario' ? ' ' : '\n');
+                                // Logic: If the PREVIOUS section was 'scenario', disable copy.
+                                const shouldAllowCopy = currentSection !== 'scenario';
+
+                                renderCopyableBlock(
+                                    contentBuffer, 
+                                    questionContainer, 
+                                    currentSection === 'question_text' || currentSection === 'scenario' ? ' ' : '\n',
+                                    shouldAllowCopy
+                                );
                                 contentBuffer = [];
                             }
 
@@ -367,10 +310,11 @@ The correct format is the Author followed by the Year in parentheses.`;
                             if (currentSection === 'question_text' || currentSection === 'hint_explanation' || currentSection === 'scenario') {
                                 contentBuffer.push(trimmedLine);
                             } else if (currentSection === 'options') {
-                                renderSingleCopyableLine(trimmedLine, questionContainer, trimmedLine === correctAnswerText);
+                                renderSingleCopyableLine(trimmedLine, questionContainer, trimmedLine === correctAnswerText, true);
                             } else if (currentSection === 'correct_answer') {
                                 correctAnswerText = trimmedLine;
-                                renderSingleCopyableLine(trimmedLine, questionContainer, true);
+                                // Pass 'false' to disable copy for correct answer
+                                renderSingleCopyableLine(trimmedLine, questionContainer, true, false);
                                 currentSection = 'none';
                             } else {
                                 contentBuffer.push(trimmedLine);
@@ -379,7 +323,13 @@ The correct format is the Author followed by the Year in parentheses.`;
                     });
 
                     if (contentBuffer.length > 0) {
-                        renderCopyableBlock(contentBuffer, questionContainer, currentSection === 'question_text' || currentSection === 'scenario' ? ' ' : '\n');
+                        const shouldAllowCopy = currentSection !== 'scenario';
+                        renderCopyableBlock(
+                            contentBuffer, 
+                            questionContainer, 
+                            currentSection === 'question_text' || currentSection === 'scenario' ? ' ' : '\n',
+                            shouldAllowCopy
+                        );
                     }
                 });
             }

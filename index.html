@@ -135,38 +135,132 @@
             const copyNotification = document.getElementById('copyNotification');
 
             // Initial Example Text
-            inputText.value = `Question 1
-Question Title:
-Harvard | ReferenceList | Book | DragDrop | Q1
-
-Scenario: Single Author (Scenario 1)
-
+            inputText.value = `Question Title: Harvard | ReferenceList | Book | DragDrop | BK1
 Question:
-You are citing a 2026 book titled "Digital Age" written by M. Lee published by Sage in London.
-
+You need to reference the book Principles of Marketing by Philip Kotler, published in 2024 by Pearson in London.
 Question Parts (Correct Drag Items):
-(2026)
-London:
 
+Kotler, P.
+Principles of marketing
+:
+.
 Fixed Parts:
-Lee, M.  ||  Digital Age.  ||  Sage.
-
-Correct Answer:
-Lee, M. (2026) Digital Age. London: Sage.
-
+| (2024) || . London || Pearson |
 Confusing Words (Distractor Drag Items):
-Lee
-pg.
-Vol.
 
-Hint:
-Harvard: Author (Year) Title. Place: Publisher.`;
+Kotler, Philip
+Principles of Marketing
+;
+,
+Correct Answer:
+Kotler, P. (2024) Principles of marketing. London: Pearson.
+2. Books | Focus: Two Authors and "and" Usage
+Question Title: Harvard | ReferenceList | Book | DragDrop | BK2
+Question:
+Reference the book Research Methods by Dr. Fiona Brown and Liam Smith, published in 2023 by Sage in Thousand Oaks.
+Question Parts (Correct Drag Items):
 
+and
+Smith, L.
+(2023)
+:
+Fixed Parts:
+Brown, F. || || || Research methods. Thousand Oaks || Sage.
+Confusing Words (Distractor Drag Items):
+
+&
+Smith, Liam
+[2023]
+;
+Correct Answer:
+Brown, F. and Smith, L. (2023) Research methods. Thousand Oaks: Sage.
+3. Books | Focus: Edition Abbreviation and Sentence Case
+Question Title: Harvard | ReferenceList | Book | DragDrop | BK3
+Question:
+Reference the 3rd edition of the book Digital Media by Sarah Jenkins, published in 2025 by Routledge in New York.
+Question Parts (Correct Drag Items):
+
+Digital media
+3rd edn.
+:
+.
+Fixed Parts:
+Jenkins, S. (2025) || . || New York || Routledge |
+Confusing Words (Distractor Drag Items):
+
+Digital Media
+3rd Ed.
+;
+,
+Correct Answer:
+Jenkins, S. (2025) Digital media. 3rd edn. New York: Routledge.
+4. Books | Focus: Three Authors and Initial Spacing
+Question Title: Harvard | ReferenceList | Book | DragDrop | BK4
+Question:
+Reference the book Global Economics by Marcus Thorne, Aisha Patel, and Daniel King, published in 2022 by Oxford University Press in Oxford.
+Question Parts (Correct Drag Items):
+
+,
+and
+King, D.
+.
+Fixed Parts:
+Thorne, M. || Patel, A. || || (2022) Global economics. Oxford: Oxford University Press |
+Confusing Words (Distractor Drag Items):
+
+;
+&
+King, Daniel
+, (used as end punctuation)
+Correct Answer:
+Thorne, M., Patel, A. and King, D. (2022) Global economics. Oxford: Oxford University Press.
+5. Books | Focus: Missing Date and Translation
+Question Title: Harvard | ReferenceList | Book | DragDrop | BK5
+Question:
+Reference the book The Stranger by Albert Camus, translated by Matthew Ward. The book has no listed publication date and was published in New York by Vintage.
+Question Parts (Correct Drag Items):
+
+(n.d.)
+(Translated by M. Ward)
+:
+.
+Fixed Parts:
+Camus, A. || The stranger. || || New York || Vintage |
+Confusing Words (Distractor Drag Items):
+
+(no date)
+(Trans. M. Ward)
+;
+,
+Correct Answer:
+Camus, A. (n.d.) The stranger. (Translated by M. Ward). New York: Vintage.`;
+
+            // Updated Keywords
             const headingKeywords = [
-                'Question Title:', 'Question:', 'Scenario:', 'Options:', 'Correct Answer:',
-                'Hint/Explanation:', 'Fixed Parts:', 'Question Parts (Correct Drag Items):',
-                'Confusing Words (Distractor Drag Items):', 'Hint:', 'Full Correct Reference:'
+                'Question Title:', 
+                'Question:', 
+                'Scenario:', 
+                'Options:', 
+                'Correct Answer:',
+                'Hint/Explanation:', 
+                'Fixed Parts:', 
+                'Question Parts (Correct Drag Items):', 
+                'Question Parts', 
+                'Confusing Words (Distractor Drag Items):', 
+                'Confusing Words', 
+                'Hint:', 
+                'Full Correct Reference:'
             ];
+
+            const sectionMap = {
+                'Question Title:': 'title',
+                'Question:': 'question_text',
+                'Question Parts': 'parts',
+                'Fixed Parts:': 'fixed',
+                'Confusing Words': 'distractors',
+                'Correct Answer:': 'answer',
+                'Hint': 'hint'
+            };
 
             // Icons for buttons
             const COPY_ICON = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>`;
@@ -187,154 +281,178 @@ Harvard: Author (Year) Title. Place: Publisher.`;
                     return;
                 }
 
-                const questionBlocks = text.split(/\n(?=Question \d+)/g);
-                let animationDelay = 0; // Start delay counter
+                const lines = text.split('\n');
+                let blocks = [];
+                let currentBlock = [];
 
-                questionBlocks.forEach((block, index) => {
-                    if (!block.trim()) return;
+                lines.forEach(line => {
+                    const trimmed = line.trim();
+                    const isNumberedHeader = /^\d+\./.test(trimmed);
+                    const isTitleHeader = trimmed.startsWith('Question Title:');
+                    
+                    if (isNumberedHeader) {
+                        if (currentBlock.length > 0) blocks.push(currentBlock);
+                        currentBlock = [line];
+                    } else if (isTitleHeader) {
+                         const justStarted = currentBlock.length === 1 && /^\d+\./.test(currentBlock[0].trim());
+                         
+                         if (!justStarted && currentBlock.length > 0) {
+                             blocks.push(currentBlock);
+                             currentBlock = [line];
+                         } else {
+                             currentBlock.push(line);
+                         }
+                    } else {
+                        currentBlock.push(line);
+                    }
+                });
+                if (currentBlock.length > 0) blocks.push(currentBlock);
 
-                    // Main Card for the Question
+                let animationDelay = 0;
+
+                blocks.forEach((blockLines) => {
+                    if (blockLines.length === 0) return;
+
                     const questionContainer = document.createElement('div');
                     questionContainer.className = 'glass-panel p-6 rounded-2xl mb-8 fade-in-up border-l-4 border-indigo-500';
                     questionContainer.style.animationDelay = `${animationDelay}ms`;
-                    animationDelay += 100; // Increment delay for staggering
+                    animationDelay += 100;
 
                     outputContainer.appendChild(questionContainer);
 
-                    const lines = block.split('\n');
                     let contentBuffer = [];
                     let currentSection = 'none';
-                    let correctAnswerText = '';
 
-                    // Helper to render a block
-                    const renderCopyableBlock = (content, container, joinCharacter = '\n', allowCopy = true) => {
-                        const filteredContent = content.filter(line => line.trim() !== '');
-                        if (filteredContent.length === 0) return;
-                        const joinedContent = filteredContent.join(joinCharacter);
-
-                        const contentWrapper = document.createElement('div');
-                        contentWrapper.className = 'flex justify-between items-start bg-slate-900/40 p-4 rounded-xl my-3 border border-gray-700/50 hover:border-indigo-500/50 transition-colors group';
-                        
-                        const textSpan = document.createElement('span');
-                        textSpan.className = 'text-gray-200 whitespace-pre-wrap flex-grow font-normal leading-relaxed';
-                        textSpan.textContent = joinedContent;
-                        
-                        if (allowCopy) {
-                            const copyBtn = createCopyButton(joinedContent);
-                            contentWrapper.appendChild(copyBtn);
-                        }
-
-                        contentWrapper.appendChild(textSpan);
-                        // Append button last if using flex-between to keep text on left
-                        if (allowCopy && contentWrapper.children.length > 1) {
-                             // Re-append to ensure order
-                             const btn = contentWrapper.children[0] === textSpan ? contentWrapper.children[1] : contentWrapper.children[0];
-                             contentWrapper.appendChild(btn);
-                        }
-                        
-                        container.appendChild(contentWrapper);
-                    };
-
-                    // Helper to render single line
-                    const renderSingleCopyableLine = (content, container, isCorrect = false, allowCopy = true) => {
-                        if (!content.trim()) return;
-
-                        const contentWrapper = document.createElement('div');
-                        // Green styling for correct, standard for others
-                        const bgClass = isCorrect 
-                            ? 'bg-emerald-900/30 border-emerald-500/30' 
-                            : 'bg-slate-800/40 border-gray-700/30';
-                        
-                        contentWrapper.className = `flex justify-between items-center p-3 rounded-lg my-2 border transition-all hover:translate-x-1 duration-200 ${bgClass}`;
-                        
-                        const textSpan = document.createElement('span');
-                        textSpan.className = isCorrect ? 'text-emerald-200 font-medium' : 'text-gray-300';
-                        textSpan.textContent = content;
-                        
-                        contentWrapper.appendChild(textSpan);
-
-                        if (allowCopy) {
-                            const copyBtn = createCopyButton(content);
-                            contentWrapper.appendChild(copyBtn);
-                        }
-
-                        container.appendChild(contentWrapper);
-                    };
-
-                    // Logic to parse lines
-                    lines.forEach(line => {
+                    blockLines.forEach(line => {
                         const trimmedLine = line.trim();
-                        const isHeadingOrSeparator = headingKeywords.some(keyword => trimmedLine.startsWith(keyword)) || /^-+$/.test(trimmedLine);
-                        const isQuestionNumber = /^Question \d+$/.test(trimmedLine);
+                        // Find match
+                        const matchedHeader = headingKeywords.find(k => trimmedLine.startsWith(k));
+                        const isSeparator = /^-+$/.test(trimmedLine);
+                        const isNumberedHeader = /^\d+\./.test(trimmedLine);
 
-                        if (isHeadingOrSeparator || isQuestionNumber) {
+                        if (matchedHeader || isSeparator || isNumberedHeader) {
+                            // Flush previous buffer
                             if (contentBuffer.length > 0) {
-                                // Logic: If the PREVIOUS section was 'scenario', disable copy.
-                                const shouldAllowCopy = currentSection !== 'scenario';
-
-                                renderCopyableBlock(
-                                    contentBuffer, 
-                                    questionContainer, 
-                                    currentSection === 'question_text' || currentSection === 'scenario' ? ' ' : '\n',
-                                    shouldAllowCopy
-                                );
+                                processBuffer(contentBuffer, currentSection, questionContainer);
                                 contentBuffer = [];
                             }
 
-                            if (isQuestionNumber) {
+                            if (isNumberedHeader) {
+                                // Create separate copyable section for the numbered header
+                                const headerWrapper = document.createElement('div');
+                                headerWrapper.className = 'flex justify-between items-center mb-6 mt-4 border-b border-gray-700/50 pb-4'; 
+
                                 const heading = document.createElement('h3');
-                                heading.className = 'text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-indigo-300 mb-4 mt-2';
+                                heading.className = 'text-xl sm:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-indigo-300 flex-grow pr-4';
                                 heading.textContent = trimmedLine;
-                                questionContainer.appendChild(heading);
+                                
+                                const copyBtn = createCopyButton(trimmedLine);
+                                
+                                headerWrapper.appendChild(heading);
+                                headerWrapper.appendChild(copyBtn);
+                                questionContainer.appendChild(headerWrapper);
+                                
                                 currentSection = 'none';
-                                correctAnswerText = '';
-                            } else if (/^-+$/.test(trimmedLine)) {
+                            } else if (isSeparator) {
                                 const hr = document.createElement('div');
                                 hr.className = 'h-px bg-gradient-to-r from-transparent via-gray-600 to-transparent my-6';
                                 questionContainer.appendChild(hr);
                                 currentSection = 'none';
                             } else {
+                                // matchedHeader is the Label (e.g. "Question Title:")
                                 const headingDiv = document.createElement('div');
                                 headingDiv.className = 'text-xs font-bold text-indigo-400 uppercase tracking-widest mt-6 mb-2 pl-1';
-                                headingDiv.textContent = trimmedLine;
+                                headingDiv.textContent = matchedHeader; 
                                 questionContainer.appendChild(headingDiv);
+                                
+                                // Determine new section
+                                const mapKey = Object.keys(sectionMap).find(k => trimmedLine.startsWith(k));
+                                currentSection = mapKey ? sectionMap[mapKey] : 'none';
 
-                                if (trimmedLine.startsWith('Question:')) currentSection = 'question_text';
-                                else if (trimmedLine.startsWith('Scenario:')) currentSection = 'scenario';
-                                else if (trimmedLine.startsWith('Options:') || trimmedLine.startsWith('Question Parts') || trimmedLine.startsWith('Confusing Words') || trimmedLine.startsWith('Fixed Parts:')) currentSection = 'options';
-                                else if (trimmedLine.startsWith('Correct Answer:') || trimmedLine.startsWith('Full Correct Reference:')) currentSection = 'correct_answer';
-                                else if (trimmedLine.startsWith('Hint')) currentSection = 'hint_explanation';
-                                else currentSection = 'none';
+                                // Check for content on the SAME line
+                                const contentAfter = trimmedLine.substring(matchedHeader.length).trim();
+                                if (contentAfter) {
+                                    contentBuffer.push(contentAfter);
+                                }
                             }
                         } else if (trimmedLine !== '') {
-                            if (currentSection === 'question_text' || currentSection === 'hint_explanation' || currentSection === 'scenario') {
-                                contentBuffer.push(trimmedLine);
-                            } else if (currentSection === 'options') {
-                                renderSingleCopyableLine(trimmedLine, questionContainer, trimmedLine === correctAnswerText, true);
-                            } else if (currentSection === 'correct_answer') {
-                                correctAnswerText = trimmedLine;
-                                // Pass 'false' to disable copy for correct answer
-                                renderSingleCopyableLine(trimmedLine, questionContainer, true, false);
-                                currentSection = 'none';
-                            } else {
-                                contentBuffer.push(trimmedLine);
-                            }
+                            contentBuffer.push(trimmedLine);
                         }
                     });
 
+                    // Flush remaining buffer
                     if (contentBuffer.length > 0) {
-                        const shouldAllowCopy = currentSection !== 'scenario';
-                        renderCopyableBlock(
-                            contentBuffer, 
-                            questionContainer, 
-                            currentSection === 'question_text' || currentSection === 'scenario' ? ' ' : '\n',
-                            shouldAllowCopy
-                        );
+                        processBuffer(contentBuffer, currentSection, questionContainer);
                     }
                 });
             }
 
-            // Enhanced Copy Button Creator
+            function processBuffer(buffer, section, container) {
+                // Configured Permissions:
+                // COPYABLE: title, question_text, parts, fixed, distractors, hint
+                // NOT COPYABLE: answer
+                
+                let allowCopy = true;
+                let joinChar = '\n';
+                
+                if (section === 'answer') {
+                    allowCopy = false;
+                }
+                
+                if (section === 'question_text') joinChar = ' ';
+
+                const joinedContent = buffer.join(joinChar);
+                
+                // List-style render for drag items (Parts, Fixed, Distractors)
+                // Block-style render for Text (Title, Question, Answer, Hint)
+                
+                if (section === 'parts' || section === 'distractors' || section === 'fixed') {
+                     // Render each non-empty line as a separate copyable entity
+                     buffer.forEach(line => {
+                         if(line.trim()) renderCopyableLine(line, container, allowCopy);
+                     });
+                } else {
+                    // Render as a single block
+                    renderCopyableBlock(joinedContent, container, allowCopy);
+                }
+            }
+
+            function renderCopyableBlock(text, container, allowCopy) {
+                const contentWrapper = document.createElement('div');
+                contentWrapper.className = 'flex justify-between items-start bg-slate-900/40 p-4 rounded-xl my-3 border border-gray-700/50 hover:border-indigo-500/50 transition-colors group';
+                
+                const textSpan = document.createElement('span');
+                textSpan.className = 'text-gray-200 whitespace-pre-wrap flex-grow font-normal leading-relaxed';
+                textSpan.textContent = text;
+                
+                contentWrapper.appendChild(textSpan);
+                
+                if (allowCopy) {
+                    const copyBtn = createCopyButton(text);
+                    contentWrapper.appendChild(copyBtn);
+                }
+                
+                container.appendChild(contentWrapper);
+            }
+
+            function renderCopyableLine(text, container, allowCopy) {
+                const contentWrapper = document.createElement('div');
+                contentWrapper.className = `flex justify-between items-center p-3 rounded-lg my-2 border border-gray-700/30 bg-slate-800/40 transition-all hover:translate-x-1 duration-200`;
+                
+                const textSpan = document.createElement('span');
+                textSpan.className = 'text-gray-300';
+                textSpan.textContent = text;
+                
+                contentWrapper.appendChild(textSpan);
+
+                if (allowCopy) {
+                    const copyBtn = createCopyButton(text);
+                    contentWrapper.appendChild(copyBtn);
+                }
+
+                container.appendChild(contentWrapper);
+            }
+
             function createCopyButton(text) {
                 const btn = document.createElement('button');
                 btn.className = 'flex items-center justify-center ml-4 p-2 rounded-lg bg-slate-700 hover:bg-indigo-600 text-gray-400 hover:text-white transition-all duration-300 shadow-sm hover:shadow-lg hover:scale-110 flex-shrink-0';
@@ -344,12 +462,10 @@ Harvard: Author (Year) Title. Place: Publisher.`;
                 btn.onclick = function() {
                     copyToClipboard(text);
                     
-                    // Visual Feedback on Button
                     btn.innerHTML = CHECK_ICON;
                     btn.classList.remove('bg-slate-700', 'hover:bg-indigo-600');
                     btn.classList.add('bg-emerald-500', 'text-white');
                     
-                    // Revert after 2 seconds
                     setTimeout(() => {
                         btn.innerHTML = COPY_ICON;
                         btn.classList.remove('bg-emerald-500', 'text-white');
@@ -383,7 +499,6 @@ Harvard: Author (Year) Title. Place: Publisher.`;
                 }, 2000);
             }
             
-            // Auto-run on load
             generateCopyableContent();
         });
     </script>

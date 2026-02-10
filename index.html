@@ -135,105 +135,134 @@
             const copyNotification = document.getElementById('copyNotification');
 
             // Initial Example Text
-            inputText.value = `Question Title: Harvard | ReferenceList | Book | DragDrop | BK1
+            inputText.value = `Question 6 (City tested)
+Question Title:
+
+Harvard | ReferenceList | Book | DragDrop | Q6
 Question:
-You need to reference the book Principles of Marketing by Philip Kotler, published in 2024 by Pearson in London.
+
+You are referencing a book titled Social Media Studies, written by Laura Green, published in 2022 by Sage in London.
 Question Parts (Correct Drag Items):
 
-Kotler, P.
-Principles of marketing
-:
-.
+Green
+
+L.
+
+2022
+
+London
 Fixed Parts:
-| (2024) || . London || Pearson |
+
+| , || ( || ). Social Media Studies. || : Sage
 Confusing Words (Distractor Drag Items):
 
-Kotler, Philip
-Principles of Marketing
-;
-,
-Correct Answer:
-Kotler, P. (2024) Principles of marketing. London: Pearson.
-2. Books | Focus: Two Authors and "and" Usage
-Question Title: Harvard | ReferenceList | Book | DragDrop | BK2
+Oxford
+
+Manchester
+
+New York
+Question 7 (Book title tested)
+Question Title:
+
+Harvard | ReferenceList | Book | DragDrop | Q7
 Question:
-Reference the book Research Methods by Dr. Fiona Brown and Liam Smith, published in 2023 by Sage in Thousand Oaks.
+
+You are creating a reference for a book titled Public Policy Today, written by Michael Turner, which was published in 2017 by Routledge in Oxford.
 Question Parts (Correct Drag Items):
 
-and
-Smith, L.
-(2023)
-:
+Turner
+
+M.
+
+2017
+
+Public Policy Today
 Fixed Parts:
-Brown, F. || || || Research methods. Thousand Oaks || Sage.
+
+| , || ( || ). || . Oxford: Routledge
 Confusing Words (Distractor Drag Items):
 
-&
-Smith, Liam
-[2023]
-;
-Correct Answer:
-Brown, F. and Smith, L. (2023) Research methods. Thousand Oaks: Sage.
-3. Books | Focus: Edition Abbreviation and Sentence Case
-Question Title: Harvard | ReferenceList | Book | DragDrop | BK3
+Economic Policy
+
+2019
+
+London
+Question 8 (City + parentheses tested)
+Question Title:
+
+Harvard | ReferenceList | Book | DragDrop | Q8
 Question:
-Reference the 3rd edition of the book Digital Media by Sarah Jenkins, published in 2025 by Routledge in New York.
+
+You are writing a reference for a book titled Introduction to Sociology, written by Hannah White, which was published in 2020 by Pearson in Boston.
 Question Parts (Correct Drag Items):
 
-Digital media
-3rd edn.
-:
-.
+(
+
+2020
+
+)
+
+Boston
 Fixed Parts:
-Jenkins, S. (2025) || . || New York || Routledge |
+
+White, H. || || || Introduction to Sociology. || : Pearson.
 Confusing Words (Distractor Drag Items):
 
-Digital Media
-3rd Ed.
-;
-,
-Correct Answer:
-Jenkins, S. (2025) Digital media. 3rd edn. New York: Routledge.
-4. Books | Focus: Three Authors and Initial Spacing
-Question Title: Harvard | ReferenceList | Book | DragDrop | BK4
+New York
+
+London
+
+2018
+Question 9 (Publisher tested)
+Question Title:
+
+Harvard | ReferenceList | Book | DragDrop | Q9
 Question:
-Reference the book Global Economics by Marcus Thorne, Aisha Patel, and Daniel King, published in 2022 by Oxford University Press in Oxford.
+
+You are referencing a book titled Environmental Economics, written by Peter Hall, which was published in 2015 by Elsevier in Amsterdam.
 Question Parts (Correct Drag Items):
 
-,
-and
-King, D.
-.
+Hall
+
+P.
+
+2015
+
+Elsevier
 Fixed Parts:
-Thorne, M. || Patel, A. || || (2022) Global economics. Oxford: Oxford University Press |
+
+| , || ( || ). Environmental Economics. Amsterdam: |
 Confusing Words (Distractor Drag Items):
 
-;
-&
-King, Daniel
-, (used as end punctuation)
-Correct Answer:
-Thorne, M., Patel, A. and King, D. (2022) Global economics. Oxford: Oxford University Press.
-5. Books | Focus: Missing Date and Translation
-Question Title: Harvard | ReferenceList | Book | DragDrop | BK5
+Springer
+
+Routledge
+
+{2015}
+Question 10 (Book title tested)
+Question Title:
+
+Harvard | ReferenceList | Book | DragDrop | Q10
 Question:
-Reference the book The Stranger by Albert Camus, translated by Matthew Ward. The book has no listed publication date and was published in New York by Vintage.
+
+You are creating a reference for a book titled Digital Marketing Strategies, written by Sarah Collins, which was published in 2021 by McGraw-Hill in New York.
 Question Parts (Correct Drag Items):
 
-(n.d.)
-(Translated by M. Ward)
-:
-.
+Collins
+
+S.
+
+Digital Marketing Strategies
+
+New York
 Fixed Parts:
-Camus, A. || The stranger. || || New York || Vintage |
+
+| , || (2021). || . || : McGraw-Hill
 Confusing Words (Distractor Drag Items):
 
-(no date)
-(Trans. M. Ward)
-;
-,
-Correct Answer:
-Camus, A. (n.d.) The stranger. (Translated by M. Ward). New York: Vintage.`;
+Online Marketing
+
+London`;
 
             // Updated Keywords
             const headingKeywords = [
@@ -272,7 +301,6 @@ Camus, A. (n.d.) The stranger. (Translated by M. Ward). New York: Vintage.`;
                 const text = inputText.value.trim();
                 outputContainer.innerHTML = '';
                 
-                // Visual feedback on the result section
                 resultSection.classList.remove('opacity-50');
                 resultSection.classList.add('opacity-100');
 
@@ -284,26 +312,39 @@ Camus, A. (n.d.) The stranger. (Translated by M. Ward). New York: Vintage.`;
                 const lines = text.split('\n');
                 let blocks = [];
                 let currentBlock = [];
+                let insideExplicitBlock = false;
 
                 lines.forEach(line => {
                     const trimmed = line.trim();
                     const isNumberedHeader = /^\d+\./.test(trimmed);
-                    const isTitleHeader = trimmed.startsWith('Question Title:');
+                    const isQuestionHeader = /^Question \d+/.test(trimmed); 
+                    const isExplicitHeader = isNumberedHeader || isQuestionHeader;
                     
-                    if (isNumberedHeader) {
+                    const isTitleHeader = trimmed.startsWith('Question Title:');
+                    const isNewFormatStart = trimmed.startsWith('You are');
+                    
+                    if (isExplicitHeader) {
+                        // Start of a new explicit block
                         if (currentBlock.length > 0) blocks.push(currentBlock);
                         currentBlock = [line];
-                    } else if (isTitleHeader) {
-                         const justStarted = currentBlock.length === 1 && /^\d+\./.test(currentBlock[0].trim());
-                         
-                         if (!justStarted && currentBlock.length > 0) {
-                             blocks.push(currentBlock);
-                             currentBlock = [line];
-                         } else {
-                             currentBlock.push(line);
-                         }
-                    } else {
+                        insideExplicitBlock = true;
+                    } else if (insideExplicitBlock) {
+                        // We are inside an explicit block (e.g., "Question 6"), so capture everything (Title, Parts, etc)
+                        // until the next explicit header starts (handled by the 'if' above).
                         currentBlock.push(line);
+                    } else {
+                        // We are in "Implicit Mode" (Old Q1 style or MCQ without numbering)
+                        if (isTitleHeader || isNewFormatStart) {
+                             // If we hit a start signal and have content, assume new block
+                             if (currentBlock.length > 0 && currentBlock.some(l => l.trim() !== '')) {
+                                 blocks.push(currentBlock);
+                                 currentBlock = [line];
+                             } else {
+                                 currentBlock.push(line);
+                             }
+                        } else {
+                            currentBlock.push(line);
+                        }
                     }
                 });
                 if (currentBlock.length > 0) blocks.push(currentBlock);
@@ -311,7 +352,8 @@ Camus, A. (n.d.) The stranger. (Translated by M. Ward). New York: Vintage.`;
                 let animationDelay = 0;
 
                 blocks.forEach((blockLines) => {
-                    if (blockLines.length === 0) return;
+                    const filteredLines = blockLines.filter(l => l.trim() !== '');
+                    if (filteredLines.length === 0) return;
 
                     const questionContainer = document.createElement('div');
                     questionContainer.className = 'glass-panel p-6 rounded-2xl mb-8 fade-in-up border-l-4 border-indigo-500';
@@ -320,99 +362,107 @@ Camus, A. (n.d.) The stranger. (Translated by M. Ward). New York: Vintage.`;
 
                     outputContainer.appendChild(questionContainer);
 
-                    let contentBuffer = [];
-                    let currentSection = 'none';
+                    // --- DETECTION LOGIC ---
+                    const isMCQ = filteredLines.some(l => l.includes('← Correct') || l.includes('<- Correct'));
 
-                    blockLines.forEach(line => {
-                        const trimmedLine = line.trim();
-                        // Find match
-                        const matchedHeader = headingKeywords.find(k => trimmedLine.startsWith(k));
-                        const isSeparator = /^-+$/.test(trimmedLine);
-                        const isNumberedHeader = /^\d+\./.test(trimmedLine);
-
-                        if (matchedHeader || isSeparator || isNumberedHeader) {
-                            // Flush previous buffer
-                            if (contentBuffer.length > 0) {
-                                processBuffer(contentBuffer, currentSection, questionContainer);
-                                contentBuffer = [];
-                            }
-
-                            if (isNumberedHeader) {
-                                // Create separate copyable section for the numbered header
-                                const headerWrapper = document.createElement('div');
-                                headerWrapper.className = 'flex justify-between items-center mb-6 mt-4 border-b border-gray-700/50 pb-4'; 
-
-                                const heading = document.createElement('h3');
-                                heading.className = 'text-xl sm:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-indigo-300 flex-grow pr-4';
-                                heading.textContent = trimmedLine;
-                                
-                                const copyBtn = createCopyButton(trimmedLine);
-                                
-                                headerWrapper.appendChild(heading);
-                                headerWrapper.appendChild(copyBtn);
-                                questionContainer.appendChild(headerWrapper);
-                                
-                                currentSection = 'none';
-                            } else if (isSeparator) {
-                                const hr = document.createElement('div');
-                                hr.className = 'h-px bg-gradient-to-r from-transparent via-gray-600 to-transparent my-6';
-                                questionContainer.appendChild(hr);
-                                currentSection = 'none';
-                            } else {
-                                // matchedHeader is the Label (e.g. "Question Title:")
-                                const headingDiv = document.createElement('div');
-                                headingDiv.className = 'text-xs font-bold text-indigo-400 uppercase tracking-widest mt-6 mb-2 pl-1';
-                                headingDiv.textContent = matchedHeader; 
-                                questionContainer.appendChild(headingDiv);
-                                
-                                // Determine new section
-                                const mapKey = Object.keys(sectionMap).find(k => trimmedLine.startsWith(k));
-                                currentSection = mapKey ? sectionMap[mapKey] : 'none';
-
-                                // Check for content on the SAME line
-                                const contentAfter = trimmedLine.substring(matchedHeader.length).trim();
-                                if (contentAfter) {
-                                    contentBuffer.push(contentAfter);
-                                }
-                            }
-                        } else if (trimmedLine !== '') {
-                            contentBuffer.push(trimmedLine);
-                        }
-                    });
-
-                    // Flush remaining buffer
-                    if (contentBuffer.length > 0) {
-                        processBuffer(contentBuffer, currentSection, questionContainer);
+                    if (isMCQ) {
+                        processMCQBlock(filteredLines, questionContainer);
+                    } else {
+                        processStandardBlock(blockLines, questionContainer);
                     }
                 });
             }
 
+            // --- MCQ PROCESSOR ---
+            function processMCQBlock(lines, container) {
+                const questionText = lines[0]; 
+                const options = lines.slice(1);
+                renderCopyableBlock(questionText, container, true);
+                options.forEach(opt => {
+                    const trimmed = opt.trim();
+                    const isCorrect = trimmed.includes('← Correct') || trimmed.includes('<- Correct');
+                    let cleanText = trimmed.replace('← Correct', '').replace('<- Correct', '').trim();
+                    if (cleanText) {
+                        renderCopyableLine(cleanText, container, true, isCorrect);
+                    }
+                });
+            }
+
+            // --- STANDARD PROCESSOR ---
+            function processStandardBlock(blockLines, questionContainer) {
+                let contentBuffer = [];
+                let currentSection = 'none';
+
+                blockLines.forEach(line => {
+                    const trimmedLine = line.trim();
+                    const matchedHeader = headingKeywords.find(k => trimmedLine.startsWith(k));
+                    const isSeparator = /^-+$/.test(trimmedLine);
+                    const isNumberedHeader = /^\d+\./.test(trimmedLine);
+                    const isQuestionHeader = /^Question \d+/.test(trimmedLine); 
+
+                    if (matchedHeader || isSeparator || isNumberedHeader || isQuestionHeader) {
+                        // Flush previous content
+                        if (contentBuffer.length > 0) {
+                            processBuffer(contentBuffer, currentSection, questionContainer);
+                            contentBuffer = [];
+                        }
+
+                        // Render the Header itself
+                        if (isNumberedHeader || isQuestionHeader) {
+                            const headerWrapper = document.createElement('div');
+                            headerWrapper.className = 'flex justify-between items-center mb-6 mt-4 border-b border-gray-700/50 pb-4'; 
+                            const heading = document.createElement('h3');
+                            heading.className = 'text-xl sm:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-indigo-300 flex-grow pr-4';
+                            heading.textContent = trimmedLine;
+                            const copyBtn = createCopyButton(trimmedLine);
+                            headerWrapper.appendChild(heading);
+                            headerWrapper.appendChild(copyBtn);
+                            questionContainer.appendChild(headerWrapper);
+                            currentSection = 'none';
+                        } else if (isSeparator) {
+                            const hr = document.createElement('div');
+                            hr.className = 'h-px bg-gradient-to-r from-transparent via-gray-600 to-transparent my-6';
+                            questionContainer.appendChild(hr);
+                            currentSection = 'none';
+                        } else {
+                            // It's a Label (e.g. Question Parts:)
+                            const headingDiv = document.createElement('div');
+                            headingDiv.className = 'text-xs font-bold text-indigo-400 uppercase tracking-widest mt-6 mb-2 pl-1';
+                            headingDiv.textContent = matchedHeader; 
+                            questionContainer.appendChild(headingDiv);
+                            
+                            const mapKey = Object.keys(sectionMap).find(k => trimmedLine.startsWith(k));
+                            currentSection = mapKey ? sectionMap[mapKey] : 'none';
+
+                            const contentAfter = trimmedLine.substring(matchedHeader.length).trim();
+                            if (contentAfter) contentBuffer.push(contentAfter);
+                        }
+                    } else if (trimmedLine !== '') {
+                        contentBuffer.push(trimmedLine);
+                    }
+                });
+
+                if (contentBuffer.length > 0) {
+                    processBuffer(contentBuffer, currentSection, questionContainer);
+                }
+            }
+
             function processBuffer(buffer, section, container) {
-                // Configured Permissions:
-                // COPYABLE: title, question_text, parts, fixed, distractors, hint
-                // NOT COPYABLE: answer
-                
                 let allowCopy = true;
                 let joinChar = '\n';
                 
-                if (section === 'answer') {
-                    allowCopy = false;
-                }
-                
+                if (section === 'answer') allowCopy = false;
                 if (section === 'question_text') joinChar = ' ';
 
                 const joinedContent = buffer.join(joinChar);
                 
-                // List-style render for drag items (Parts, Fixed, Distractors)
-                // Block-style render for Text (Title, Question, Answer, Hint)
-                
+                // For drag/drop lists, we want line-by-line copies.
+                // For 'fixed' parts, technically it's a drag item too, usually one line, but can be multiple.
                 if (section === 'parts' || section === 'distractors' || section === 'fixed') {
-                     // Render each non-empty line as a separate copyable entity
                      buffer.forEach(line => {
                          if(line.trim()) renderCopyableLine(line, container, allowCopy);
                      });
                 } else {
-                    // Render as a single block
                     renderCopyableBlock(joinedContent, container, allowCopy);
                 }
             }
@@ -426,21 +476,28 @@ Camus, A. (n.d.) The stranger. (Translated by M. Ward). New York: Vintage.`;
                 textSpan.textContent = text;
                 
                 contentWrapper.appendChild(textSpan);
-                
                 if (allowCopy) {
                     const copyBtn = createCopyButton(text);
                     contentWrapper.appendChild(copyBtn);
                 }
-                
                 container.appendChild(contentWrapper);
             }
 
-            function renderCopyableLine(text, container, allowCopy) {
+            function renderCopyableLine(text, container, allowCopy, isCorrect = false) {
                 const contentWrapper = document.createElement('div');
-                contentWrapper.className = `flex justify-between items-center p-3 rounded-lg my-2 border border-gray-700/30 bg-slate-800/40 transition-all hover:translate-x-1 duration-200`;
+                
+                let baseClasses = "flex justify-between items-center p-3 rounded-lg my-2 border transition-all hover:translate-x-1 duration-200";
+                
+                if (isCorrect) {
+                    baseClasses += " bg-emerald-900/30 border-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.1)]";
+                } else {
+                    baseClasses += " bg-slate-800/40 border-gray-700/30";
+                }
+                
+                contentWrapper.className = baseClasses;
                 
                 const textSpan = document.createElement('span');
-                textSpan.className = 'text-gray-300';
+                textSpan.className = isCorrect ? 'text-emerald-200 font-medium' : 'text-gray-300';
                 textSpan.textContent = text;
                 
                 contentWrapper.appendChild(textSpan);
@@ -461,11 +518,9 @@ Camus, A. (n.d.) The stranger. (Translated by M. Ward). New York: Vintage.`;
 
                 btn.onclick = function() {
                     copyToClipboard(text);
-                    
                     btn.innerHTML = CHECK_ICON;
                     btn.classList.remove('bg-slate-700', 'hover:bg-indigo-600');
                     btn.classList.add('bg-emerald-500', 'text-white');
-                    
                     setTimeout(() => {
                         btn.innerHTML = COPY_ICON;
                         btn.classList.remove('bg-emerald-500', 'text-white');

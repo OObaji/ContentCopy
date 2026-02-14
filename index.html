@@ -135,295 +135,76 @@
             const copyNotification = document.getElementById('copyNotification');
 
             // Initial Example Text
-            inputText.value = `Question 16 (City tested)
-Question Title:
+            inputText.value = `Question 16
+Question title:
 
-Harvard | ReferenceList | Book | DragDrop | BK16
-Question:
+Harvard | ReferenceList | EditedBook | DragDrop | ED16
+Scenario:
 
-You are referencing a book titled Organisational Behaviour, written by Kevin Morris, published in 2020 by Routledge in London.
-Question Parts:
+You are creating a reference for an edited book titled Cultural Studies Today, edited by Richard Adams, which was published in 2018 by Routledge in London.
+Question parts:
 
-Morris
-
-K.
-
-2020
-
-London
-Fixed text:
-
-| , || ( || ). Organisational Behaviour. || : Routledge
-Confusing words:
-
-Kevin
-
-M.
-
-Oxford
-Question 17 (Book title tested — author confusion)
-Question Title:
-
-Harvard | ReferenceList | Book | DragDrop | BK17
-Question:
-
-You are creating a reference for a book titled Human Geography, written by Sophie Turner, which was published in 2018 by Wiley in Hoboken.
-Question Parts:
-
-Turner
-
-S.
-
-Human Geography
-
-Hoboken
-Fixed text:
-
-| , || ( || ). || . Hoboken: Wiley
-Confusing words:
-
-Sophie
-
-T.
-
-Physical Geography
-Question 18 (City + parentheses tested)
-Question Title:
-
-Harvard | ReferenceList | Book | DragDrop | BK18
-Question:
-
-You are writing a reference for a book titled Introduction to Psychology, written by Daniel Roberts, which was published in 2019 by Pearson in Boston.
-Question Parts:
-
-(
-
-2019
-
-)
-
-Boston
-Fixed text:
-
-Roberts, D. || || || Introduction to Psychology. || : Pearson.
-Confusing words:
-
-Daniel
+Adams
 
 R.
 
-London
-Question 19 (Publisher tested — author confusion)
-Question Title:
+ed.
 
-Harvard | ReferenceList | Book | DragDrop | BK19
-Question:
-
-You are referencing a book titled Global Business, written by Linda Park, which was published in 2017 by McGraw-Hill in New York.
-Question Parts:
-
-Park
-
-L.
-
-2017
-
-McGraw-Hill
+2018
 Fixed text:
 
-| , || ( || ). Global Business. New York: |
+|, || (||) (||) Cultural Studies Today. London: Routledge.
 Confusing words:
 
-Linda
+eds
 
-P.
+Adam
 
-Pearson
-Question 20 (Book title tested)
-Question Title:
+New York`;
 
-Harvard | ReferenceList | Book | DragDrop | BK20
-Question:
-
-You are creating a reference for a book titled Health Policy and Practice, written by Robert Allen, which was published in 2022 by Sage in London.
-Question Parts:
-
-Allen
-
-R.
-
-Health Policy and Practice
-
-London
-Fixed text:
-
-| , || (2022). || . || : Sage
-Confusing words:
-
-Robert
-
-A.
-
-Oxford
-Question 21 (City tested — author confusion)
-Question Title:
-
-Harvard | ReferenceList | Book | DragDrop | BK21
-Question:
-
-You are referencing a book titled Financial Accounting, written by James Wilson, published in 2016 by Pearson in Harlow.
-Question Parts:
-
-Wilson
-
-J.
-
-2016
-
-Harlow
-Fixed text:
-
-| , || ( || ). Financial Accounting. || : Pearson
-Confusing words:
-
-James
-
-W.
-
-London
-Question 22 (Book title tested)
-Question Title:
-
-Harvard | ReferenceList | Book | DragDrop | BK22
-Question:
-
-You are creating a reference for a book titled Political Theory, written by Emma Lewis, which was published in 2015 by Oxford University Press in Oxford.
-Question Parts:
-
-Lewis
-
-E.
-
-Political Theory
-
-Oxford
-Fixed text:
-
-| , || ( || ). || . Oxford: Oxford University Press
-Confusing words:
-
-Emma
-
-L.
-
-International Politics
-Question 23 (City + parentheses tested — author confusion)
-Question Title:
-
-Harvard | ReferenceList | Book | DragDrop | BK23
-Question:
-
-You are writing a reference for a book titled Marketing Principles, written by Christopher Young, which was published in 2020 by Palgrave Macmillan in Basingstoke.
-Question Parts:
-
-(
-
-2020
-
-)
-
-Basingstoke
-Fixed text:
-
-Young, C. || || || Marketing Principles. || : Palgrave Macmillan.
-Confusing words:
-
-Christopher
-
-Y.
-
-London
-Question 24 (Publisher tested)
-Question Title:
-
-Harvard | ReferenceList | Book | DragDrop | BK24
-Question:
-
-You are referencing a book titled Urban Sociology, written by Hannah Brooks, which was published in 2021 by Routledge in New York.
-Question Parts:
-
-Brooks
-
-H.
-
-2021
-
-Routledge
-Fixed text:
-
-| , || ( || ). Urban Sociology. New York: |
-Confusing words:
-
-Hannah
-
-B.
-
-Springer
-Question 25 (Book title tested — author confusion)
-Question Title:
-
-Harvard | ReferenceList | Book | DragDrop | BK25
-Question:
-
-You are creating a reference for a book titled Research Methods in Education, written by Paul Stevens, which was published in 2019 by Bloomsbury in London.
-Question Parts:
-
-Stevens
-
-P.
-
-Research Methods in Education
-
-London
-Fixed text:
-
-| , || (2019). || . || : Bloomsbury
-Confusing words:
-
-Paul
-
-S.
-
-Teaching Methods`;
-
-            // Updated Keywords to include new formats
+            // Updated Keywords to include all variations provided
             const headingKeywords = [
-                'Question Title:', 
-                'Question:', 
-                'Scenario:', 
-                'Options:', 
+                'Question Title:', 'Question title:',
+                'Question:',
+                'Scenario:',
+                'Options:',
                 'Correct Answer:',
-                'Hint/Explanation:', 
-                'Fixed Parts:', 
-                'Fixed text:', // New
+                'Hint/Explanation:',
+                'Fixed Parts:', 'Fixed parts:', 'Fixed text:',
                 'Question Parts (Correct Drag Items):', 
-                'Question Parts:', // New variants
-                'Question Parts', 
+                'Question Parts:', 'Question parts:', 'Question part:',
                 'Confusing Words (Distractor Drag Items):', 
-                'Confusing words:', // New
-                'Confusing Words', 
-                'Hint:', 
+                'Confusing Words:', 'Confusing words:', 'Confusing parts:',
+                'Hint:',
                 'Full Correct Reference:'
             ];
 
+            // Mapping keywords to logic types
             const sectionMap = {
+                // Title
                 'Question Title:': 'title',
+                'Question title:': 'title',
+                
+                // Text Block (Question / Scenario)
                 'Question:': 'question_text',
+                'Scenario:': 'question_text',
+                
+                // Parts List
                 'Question Parts': 'parts',
+                'Question parts': 'parts',
+                'Question part': 'parts',
+                
+                // Fixed Text List
                 'Fixed Parts:': 'fixed',
-                'Fixed text:': 'fixed', // Map new header
+                'Fixed parts:': 'fixed',
+                'Fixed text:': 'fixed',
+                'Fixed part:': 'fixed',
+                
+                // Distractors List
                 'Confusing Words': 'distractors',
-                'Confusing words:': 'distractors', // Map new header
+                'Confusing words': 'distractors',
+                'Confusing parts': 'distractors',
+                
                 'Correct Answer:': 'answer',
                 'Hint': 'hint'
             };
@@ -457,7 +238,7 @@ Teaching Methods`;
                     const isQuestionHeader = /^Question \d+/.test(trimmed); 
                     const isExplicitHeader = isNumberedHeader || isQuestionHeader;
                     
-                    const isTitleHeader = trimmed.startsWith('Question Title:');
+                    const isTitleHeader = trimmed.startsWith('Question Title:') || trimmed.startsWith('Question title:');
                     const isNewFormatStart = trimmed.startsWith('You are');
                     
                     if (isExplicitHeader) {
@@ -466,13 +247,10 @@ Teaching Methods`;
                         currentBlock = [line];
                         insideExplicitBlock = true;
                     } else if (insideExplicitBlock) {
-                        // We are inside an explicit block (e.g., "Question 6"), so capture everything (Title, Parts, etc)
-                        // until the next explicit header starts (handled by the 'if' above).
                         currentBlock.push(line);
                     } else {
-                        // We are in "Implicit Mode" (Old Q1 style or MCQ without numbering)
+                        // Implicit mode logic
                         if (isTitleHeader || isNewFormatStart) {
-                             // If we hit a start signal and have content, assume new block
                              if (currentBlock.length > 0 && currentBlock.some(l => l.trim() !== '')) {
                                  blocks.push(currentBlock);
                                  currentBlock = [line];
@@ -499,7 +277,7 @@ Teaching Methods`;
 
                     outputContainer.appendChild(questionContainer);
 
-                    // --- DETECTION LOGIC ---
+                    // Check for MCQ Format
                     const isMCQ = filteredLines.some(l => l.includes('← Correct') || l.includes('<- Correct'));
 
                     if (isMCQ) {
@@ -532,7 +310,9 @@ Teaching Methods`;
 
                 blockLines.forEach(line => {
                     const trimmedLine = line.trim();
+                    // Match header case-insensitively or by prefix
                     const matchedHeader = headingKeywords.find(k => trimmedLine.startsWith(k));
+                    
                     const isSeparator = /^-+$/.test(trimmedLine);
                     const isNumberedHeader = /^\d+\./.test(trimmedLine);
                     const isQuestionHeader = /^Question \d+/.test(trimmedLine); 
@@ -544,7 +324,7 @@ Teaching Methods`;
                             contentBuffer = [];
                         }
 
-                        // Render the Header itself
+                        // Render Headers
                         if (isNumberedHeader || isQuestionHeader) {
                             const headerWrapper = document.createElement('div');
                             headerWrapper.className = 'flex justify-between items-center mb-6 mt-4 border-b border-gray-700/50 pb-4'; 
@@ -562,15 +342,25 @@ Teaching Methods`;
                             questionContainer.appendChild(hr);
                             currentSection = 'none';
                         } else {
-                            // It's a Label (e.g. Question Parts:)
+                            // Render Label (Scenario, Fixed text, etc)
                             const headingDiv = document.createElement('div');
                             headingDiv.className = 'text-xs font-bold text-indigo-400 uppercase tracking-widest mt-6 mb-2 pl-1';
                             headingDiv.textContent = matchedHeader; 
                             questionContainer.appendChild(headingDiv);
                             
-                            const mapKey = Object.keys(sectionMap).find(k => trimmedLine.startsWith(k));
-                            currentSection = mapKey ? sectionMap[mapKey] : 'none';
+                            // Determine Section Type from Map
+                            // Use find again to get specific key, assuming matchedHeader matches one of the map keys keys prefixes?
+                            // Actually, let's look up by matchedHeader specifically.
+                            // We need to match loose prefixes in the map.
+                            let foundKey = Object.keys(sectionMap).find(key => matchedHeader.startsWith(key) || key.startsWith(matchedHeader));
+                            // Fallback if not direct match (handle case diffs)
+                             if (!foundKey) {
+                                foundKey = Object.keys(sectionMap).find(key => matchedHeader.toLowerCase().startsWith(key.toLowerCase()));
+                            }
 
+                            currentSection = foundKey ? sectionMap[foundKey] : 'none';
+
+                            // Check for inline content
                             const contentAfter = trimmedLine.substring(matchedHeader.length).trim();
                             if (contentAfter) contentBuffer.push(contentAfter);
                         }
@@ -593,8 +383,8 @@ Teaching Methods`;
 
                 const joinedContent = buffer.join(joinChar);
                 
-                // For drag/drop lists, we want line-by-line copies.
-                // For 'fixed' parts, technically it's a drag item too, usually one line, but can be multiple.
+                // Parts, Fixed, Distractors = List Style (Line by line)
+                // Title, Question, Scenario = Block Style (Single Block)
                 if (section === 'parts' || section === 'distractors' || section === 'fixed') {
                      buffer.forEach(line => {
                          if(line.trim()) renderCopyableLine(line, container, allowCopy);

@@ -722,11 +722,16 @@ Al-Farsi, H. Advanced Engineering Mathematics (2024). Oxford.`;
                             questionContainer.appendChild(hr);
                             currentSection = 'none';
                         } else {
-                            // Render Label (Scenario, Fixed text, etc)
+                            // Render Label (Scenario, Fixed text, etc) with highlighted borders and no copy button
+                            const labelWrapper = document.createElement('div');
+                            labelWrapper.className = 'mt-7 mb-3';
+                            
                             const headingDiv = document.createElement('div');
-                            headingDiv.className = 'text-xs font-bold text-indigo-400 uppercase tracking-widest mt-6 mb-2 pl-1';
-                            headingDiv.textContent = matchedHeader; 
-                            questionContainer.appendChild(headingDiv);
+                            headingDiv.className = 'inline-block text-[11px] sm:text-xs font-bold text-indigo-300 uppercase tracking-wider px-3 py-1.5 rounded-md border border-indigo-400/80 bg-indigo-500/10 shadow-[0_0_12px_rgba(129,140,248,0.35)]';
+                            headingDiv.textContent = matchedHeader.replace(/:$/, ''); 
+                            
+                            labelWrapper.appendChild(headingDiv);
+                            questionContainer.appendChild(labelWrapper);
                             
                             // Determine Section Type from Map
                             let foundKey = Object.keys(sectionMap).find(key => matchedHeader.startsWith(key) || key.startsWith(matchedHeader));
